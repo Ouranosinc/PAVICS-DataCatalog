@@ -12,25 +12,28 @@ COPY pywps_patch /root
 
 RUN cd /root && \
     git clone https://github.com/geopython/PyWPS.git && \
-    patch /root/PyWPS/pywps/app/Service.py /root/pywps_patch && \
     cd /root/PyWPS && \
+    git reset --hard 8bcea628d22f36dd50a2b9f49cdd7f1d63aea825 && \
+    patch /root/PyWPS/pywps/app/Service.py /root/pywps_patch && \
     python setup.py install && \
-    cd /root && \
-    git clone -b pav133 https://github.com/Ouranosinc/PAVICS.git && \
     mkdir /var/www/html/wps && \
     mkdir /var/www/html/wps_results && \
-    chown games /var/www/html/wps_results && \
-    chgrp games /var/www/html/wps_results && \
-    cp /root/PAVICS/pavics/processes/wps_*.py /var/www/html/wps/ && \
     useradd apapywps && \
     mkdir /home/apapywps && \
     chown apapywps /home/apapywps && \
     chgrp apapywps /home/apapywps && \
+    chown apapywps /var/www/html/wps_results && \
+    chgrp apapywps /var/www/html/wps_results && \
+    cd /root && \
+    git clone -b pav133 https://github.com/Ouranosinc/PAVICS.git && \
+    cp /root/PAVICS/pavics/processes/wps_*.py /var/www/html/wps/ && \
     rm -rf /root/PyWPS /root/pywps_patch /root/PAVICS
 
 COPY pywps.wsgi /var/www/html/wps/
 COPY apache2.conf /etc/apache2/
 
-CMD /etc/init.d/apache2 start && tail -f /dev/null
+CMD printf "\nexport SOLR_SERVER=$SOLR_SERVER\n" >> /etc/apache2/envvars && \
+    printf "\nexport OPENSTACK_INTERNAL_IP=$OPENSTACK_INTERNAL_IP\n" >> /etc/apache2/envvars && \
+    /etc/init.d/apache2 start && tail -f /dev/null
 
-EXPOSE 8080
+EXPOSE 80

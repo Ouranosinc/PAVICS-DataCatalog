@@ -7,17 +7,18 @@ Installation:
 
 Running the application:
 
-    docker run --name my_pavicswps -d -p 8080:8080 pavicswps
-
-To access the WPS processes, get the IP address of the container:
-
-    docker inspect my_pavicswps
+    docker run --name my_pavicswps -d -p 8009:80 -e SOLR_SERVER=x.x.x.x -e OPENSTACK_INTERNAL_IP=x.x.x.x pavicswps
 
 The available processes can be obtained at:
 
-    http://x.x.x.x/pywps?service=WPS&request=GetCapabilities&version=1.0.0
+    http://localhost:8009/pywps?service=WPS&request=GetCapabilities&version=1.0.0
 
 Currently, this is linked to branch pav133 of the PAVICS project. Also,
-a patch is applied to pywps4 to fix a bug described at:
+we revert back to RC1 of pywps4 (8bcea628d22f36dd50a2b9f49cdd7f1d63aea825)
+because of a bug in RC2:
+
+    https://github.com/geopython/pywps/issues/176
+
+and a patch is applied to pywps4 to fix a bug described at:
 
     https://github.com/geopython/pywps/issues/154
