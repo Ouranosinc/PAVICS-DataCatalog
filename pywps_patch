@@ -1,0 +1,13 @@
+diff --git a/pywps/app/Service.py b/pywps/app/Service.py
+index 66b8843..67f10bf 100644
+--- a/pywps/app/Service.py
++++ b/pywps/app/Service.py
+@@ -330,7 +330,7 @@ class Service(object):
+
+             # Replace the dicts with the dict of Literal/Complex inputs
+             # set the input to the type defined in the process
+-            if isinstance(inpt, ComplexInput):
++            elif isinstance(inpt, ComplexInput):
+                 data_inputs[inpt.identifier] = self.create_complex_inputs(
+                     inpt, wps_request.inputs[inpt.identifier])
+             elif isinstance(inpt, LiteralInput):
