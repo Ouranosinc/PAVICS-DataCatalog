@@ -22,3 +22,6 @@ because of a bug in RC2:
 and a patch is applied to pywps4 to fix a bug described at:
 
     https://github.com/geopython/pywps/issues/154
+
+The PAVICS wps processes that return a json file url use port 8009. This
+could be modified to be another input (environment variable) in the future.
