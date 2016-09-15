@@ -26,10 +26,7 @@ RUN cd /root && \
     chgrp apapywps /var/www/html/wps_results && \
     rm -rf /root/PyWPS /root/pywps_patch && \
     cd /root && \
-    git clone -b pav133 https://github.com/Ouranosinc/PAVICS.git && \
-    cp /root/PAVICS/pavics/processes/wps_*.py /var/www/html/wps/ && \
-    rm -rf /root/PAVICS && \
-    git clone -b pav152 https://github.com/Ouranosinc/PAVICS.git && \
+    git clone -b wps-processes https://github.com/Ouranosinc/PAVICS.git && \
     cd /root/PAVICS && \
     python setup.py install && \
     cp /root/PAVICS/pavics/processes/wps_*.py /var/www/html/wps/ && \

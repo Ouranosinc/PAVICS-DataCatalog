@@ -13,7 +13,7 @@ The available processes can be obtained at:
 
     http://localhost:8009/pywps?service=WPS&request=GetCapabilities&version=1.0.0
 
-Currently, this is linked to branch pav133 of the PAVICS project. Also,
+Currently, this is linked to branch wps-processes of the PAVICS project. Also,
 we revert back to RC1 of pywps4 (8bcea628d22f36dd50a2b9f49cdd7f1d63aea825)
 because of a bug in RC2:
 
