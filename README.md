@@ -7,7 +7,7 @@ Installation:
 
 Running the application:
 
-    docker run --name my_pavicswps -d -p 8009:80 -e SOLR_SERVER=x.x.x.x -e OPENSTACK_INTERNAL_IP=x.x.x.x pavicswps
+    docker run --name my_pavicswps -d -p 8009:80 -e SOLR_SERVER=x.x.x.x -e OPENSTACK_INTERNAL_IP=x.x.x.x -e WPS_SERVER=x.x.x.x pavicswps
 
 The available processes can be obtained at:
 
@@ -25,3 +25,7 @@ and a patch is applied to pywps4 to fix a bug described at:
 
 The PAVICS wps processes that return a json file url use port 8009. This
 could be modified to be another input (environment variable) in the future.
+
+The pywps config file (pywps.cfg) is available. However, the outputurl
+and outputpath values should not be modified as they are currently
+hardcoded in other places.
