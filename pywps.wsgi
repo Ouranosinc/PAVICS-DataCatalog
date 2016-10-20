@@ -10,6 +10,7 @@ from wps_pavicsupdate import PavicsUpdate
 from wps_pavicrawler import PavicsCrawler
 from wps_pavicsvalidate import PavicsValidate
 from wps_period2indices import Period2Indices
+from wps_ncplotly import NCPlotly
 
 application = Service(processes=[PavicsSearch(),PavicsUpdate(),PavicsCrawler(),
-                                 PavicsValidate(),Period2Indices()])
+                                 PavicsValidate(),Period2Indices(),NCPlotly()])
