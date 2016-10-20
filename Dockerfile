@@ -34,9 +34,11 @@ RUN cd /root && \
 
 COPY pywps.wsgi /var/www/html/wps/
 COPY apache2.conf /etc/apache2/
+COPY pywps.cfg /etc/
 
 CMD printf "\nexport SOLR_SERVER=$SOLR_SERVER\n" >> /etc/apache2/envvars && \
     printf "\nexport OPENSTACK_INTERNAL_IP=$OPENSTACK_INTERNAL_IP\n" >> /etc/apache2/envvars && \
+    sed -i '/outputurl=/c\outputurl=http://'"$WPS_SERVER"':8009/wps_results/' /etc/pywps.cfg && \
     /etc/init.d/apache2 start && tail -f /dev/null
 
 EXPOSE 80
