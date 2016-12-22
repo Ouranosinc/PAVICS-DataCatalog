@@ -7,21 +7,17 @@ Installation:
 
 Running the application:
 
-    docker run --name my_pavicswps -d -p 8009:80 -e SOLR_SERVER=x.x.x.x -e OPENSTACK_INTERNAL_IP=x.x.x.x -e WPS_SERVER=x.x.x.x pavicswps
+    docker run --name my_pavicswps -d -p 8009:80 -e SOLR_HOST=x.x.x.x -e SOLR_PORT=xxxx -e OPENSTACK_INTERNAL_IP=x.x.x.x -e WPS_HOST=x.x.x.x -e WPS_PORT=xxxx -e THREDDS_HOST=x.x.x.x -e THREDDS_PORT=xxxx pavicswps
+
+WPS_HOST and WPS_PORT correspond to the host:port that will be exposed by
+this service to store output files.
+
+OPENSTACK_INTERNAL_IP is used to swap internal and external ip in an openstack
+context, optional.
 
 The available processes can be obtained at:
 
     http://localhost:8009/pywps?service=WPS&request=GetCapabilities&version=1.0.0
-
-Currently, this is linked to branch wps-processes of the PAVICS project. Also,
-we revert back to RC1 of pywps4 (8bcea628d22f36dd50a2b9f49cdd7f1d63aea825)
-because of a bug in RC2:
-
-    https://github.com/geopython/pywps/issues/176
-
-and a patch is applied to pywps4 to fix a bug described at:
-
-    https://github.com/geopython/pywps/issues/154
 
 The PAVICS wps processes that return a json file url use port 8009. This
 could be modified to be another input (environment variable) in the future.
