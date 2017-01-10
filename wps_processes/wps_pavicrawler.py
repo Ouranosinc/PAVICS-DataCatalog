@@ -13,6 +13,12 @@ if 'OPENSTACK_INTERNAL_IP' in os.environ:
     env_openstack_interal_ip = os.environ['OPENSTACK_INTERNAL_IP']
 else:
 	env_openstack_interal_ip = os.environ['SOLR_HOST']
+if 'WMS_ALTERNATE_SERVER' in os.environ:
+    wms_alternate_server = os.environ['WMS_ALTERNATE_SERVER']
+    wms_original_server = os.environ['WMS_ORIGINAL_SERVER']
+else:
+    wms_alternate_server = None
+    wms_original_server = None
 
 # Example usage:
 # localhost/pywps?service=WPS&request=execute&version=1.0.0&\
@@ -63,12 +69,12 @@ class PavicsCrawler(Process):
             status_supported=True)
 
     def _handler(self,request,response):
-        update_result = catalog.pavicrawler(thredds_server,solr_server,
-                                            my_facets,
-                                            set_dataset_id=True,
-                                            internal_ip=internal_ip,
-                                            external_ip=external_ip,
-                                            output_internal_ip=True)
+        update_result = catalog.pavicrawler(
+            thredds_server,solr_server,my_facets,set_dataset_id=True,
+            internal_ip=internal_ip,external_ip=external_ip,
+            output_internal_ip=True,
+            wms_original_server=wms_original_server,
+            wms_alternate_server=wms_alternate_server)
 
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
