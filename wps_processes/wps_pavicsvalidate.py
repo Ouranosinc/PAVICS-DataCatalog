@@ -7,7 +7,6 @@ from pywps import LiteralInput,ComplexOutput
 from pavics import catalog
 
 env_solr_host = os.environ['SOLR_HOST']
-env_solr_port = os.environ['SOLR_POST']
 
 # Example usage:
 #
@@ -23,7 +22,7 @@ env_solr_port = os.environ['SOLR_POST']
 
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://%s:%s/solr/birdhouse/" % (env_solr_host,env_solr_port)
+solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
 # The user under which apache is running must be able to write to that
 # directory.
 json_output_path = configuration.get_config_value('server','outputpath')
@@ -67,11 +66,19 @@ class PavicsValidate(Process):
     def _handler(self,request,response):
         facets = request.inputs['facets'][0].data
         facets = facets.split(',')
-        paths = request.inputs['paths'][0].data
-        if paths is not None:
+        if 'paths' in request.inputs:
+            paths = request.inputs['paths'][0].data
+        else:
+            # workaround for poor handling of default values
+            paths = None
+        if paths:
             paths = paths.split(',')
-        files = request.inputs['files'][0].data
-        if files is not None:
+        if 'files' in request.inputs:
+            files = request.inputs['files'][0].data
+        else:
+            # workaround for poor handling of default values
+            paths = None
+        if files:
             files = files.split(',')
 
         validate_result = catalog.pavicsvalidate(solr_server,facets,

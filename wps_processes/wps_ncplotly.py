@@ -81,17 +81,43 @@ class NCPlotly(Process):
             status_supported=True)
 
     def _handler(self,request,response):
+        # workaround for poor handling of default values
+        if 'time_initial_indice' in request.inputs:
+            t0 = request.inputs['time_initial_indice'][0].data
+        else:
+            t0 = None
+        if 'time_final_indice' in request.inputs:
+            tf = request.inputs['time_final_indice'][0].data
+        else:
+            tf = None
+        if 'level_initial_indice' in request.inputs:
+            l0 = request.inputs['level_initial_indice'][0].data
+        else:
+            l0 = None
+        if 'level_final_indice' in request.inputs:
+            lf = request.inputs['level_final_indice'][0].data
+        else:
+            lf = None
+        if 'spatial1_initial_indice' in request.inputs:
+            s10 = request.inputs['spatial1_initial_indice'][0].data
+        else:
+            s10 = None
+        if 'spatial1_final_indice' in request.inputs:
+            s1f = request.inputs['spatial1_final_indice'][0].data
+        else:
+            s1f = None
+        if 'spatial2_initial_indice' in request.inputs:
+            s20 = request.inputs['spatial2_initial_indice'][0].data
+        else:
+            s20 = None
+        if 'spatial2_final_indice' in request.inputs:
+            s2f = request.inputs['spatial2_final_indice'][0].data
+        else:
+            s2f = None
         d = ncplotly.ncplotly_from_slice(
             request.inputs['opendap_url'][0].data,
             request.inputs['variable_name'][0].data,
-            request.inputs['time_initial_indice'][0].data,
-            request.inputs['time_final_indice'][0].data,
-            request.inputs['level_initial_indice'][0].data,
-            request.inputs['level_final_indice'][0].data,
-            request.inputs['spatial1_initial_indice'][0].data,
-            request.inputs['spatial1_final_indice'][0].data,
-            request.inputs['spatial2_initial_indice'][0].data,
-            request.inputs['spatial2_final_indice'][0].data)
+            t0,tf,l0,lf,s10,s1f,s20,s2f)
         plotly_result = json.dumps(d)
 
         # Here we construct a unique filename

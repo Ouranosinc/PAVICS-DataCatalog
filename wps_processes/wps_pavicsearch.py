@@ -6,7 +6,6 @@ from pywps import LiteralInput,ComplexOutput
 from pavics import catalog
 
 env_solr_host = os.environ['SOLR_HOST']
-env_solr_port = os.environ['SOLR_POST']
 
 # Example usage:
 #
@@ -20,7 +19,7 @@ env_solr_port = os.environ['SOLR_POST']
 
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://%s:%s/solr/birdhouse/" % (env_solr_host,env_solr_port)
+solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
 # The user under which apache is running must be able to write to that
 # directory.
 json_output_path = configuration.get_config_value('server','outputpath')
@@ -52,7 +51,7 @@ class PavicsSearch(Process):
                   LiteralInput('limit',
                                'Pagination limit',
                                data_type='integer',
-                               default=0,  # Unable to set to 10, pywps bug.
+                               default=10,
                                min_occurs=0,
                                mode=None),
                   LiteralInput('fields',
@@ -109,24 +108,54 @@ class PavicsSearch(Process):
             status_supported=True)
 
     def _handler(self,request,response):
-        facets = request.inputs['facets'][0].data
-        limit = request.inputs['limit'][0].data
-        if limit is None:
-            # Bypass pywps bug where we are unable to set default limit
-            limit = 10
-            #limit = request.inputs['limit'][0].default
-        offset = request.inputs['offset'][0].data
-        if offset is None:
-            offset = request.inputs['offset'][0].default
-        search_type = request.inputs['type'][0].data
-        if search_type is None:
-            search_type = request.inputs['type'][0].default
-        output_format = request.inputs['format'][0].data
-        if output_format is None:
-            output_format = request.inputs['format'][0].default
-        fields = request.inputs['fields'][0].data
-        constraints = request.inputs['constraints'][0].data
-        query = request.inputs['query'][0].data
+        if 'facets' in request.inputs:
+            facets = request.inputs['facets'][0].data
+        else:
+            # workaround for poor handling of default values
+            facets = None
+        if 'limit' in request.inputs:
+            limit = request.inputs['limit'][0].data
+        else:
+            # workaround for poor handling of default values
+            for one_input in self.inputs:
+                if one_input.identifier == 'limit':
+                    limit = one_input.default
+        if 'offset' in request.inputs:
+            offset = request.inputs['offset'][0].data
+        else:
+            # workaround for poor handling of default values
+            for one_input in self.inputs:
+                if one_input.identifier == 'offset':
+                    offset = one_input.default
+        if 'type' in request.inputs:
+            search_type = request.inputs['type'][0].data
+        else:
+            # workaround for poor handling of default values
+            for one_input in self.inputs:
+                if one_input.identifier == 'type':
+                    search_type = one_input.default
+        if 'format' in request.inputs:
+            output_format = request.inputs['format'][0].data
+        else:
+            # workaround for poor handling of default values
+            for one_input in self.inputs:
+                if one_input.identifier == 'format':
+                    output_format = one_input.default
+        if 'fields' in request.inputs:
+            fields = request.inputs['fields'][0].data
+        else:
+            # workaround for poor handling of default values
+            fields = None
+        if 'constraints' in request.inputs:
+            constraints = request.inputs['constraints'][0].data
+        else:
+            # workaround for poor handling of default values
+            constraints = None
+        if 'query' in request.inputs:
+            query = request.inputs['query'][0].data
+        else:
+            # workaround for poor handling of default values
+            query = None
 
         search_result = catalog.pavicsearch(solr_server,facets,limit,offset,
                                             search_type,output_format,fields,

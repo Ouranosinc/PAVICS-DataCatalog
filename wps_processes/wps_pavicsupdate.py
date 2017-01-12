@@ -6,7 +6,6 @@ from pywps import LiteralInput,ComplexOutput
 from pavics import catalog
 
 env_solr_host = os.environ['SOLR_HOST']
-env_solr_port = os.environ['SOLR_POST']
 
 # Example usage:
 # localhost/pywps?service=WPS&request=execute&version=1.0.0&\
@@ -18,7 +17,7 @@ env_solr_port = os.environ['SOLR_POST']
 
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://%s:%s/solr/birdhouse/" % (env_solr_host,env_solr_port)
+solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
 # The user under which apache is running must be able to write to that
 # directory.
 json_output_path = configuration.get_config_value('server','outputpath')
@@ -61,7 +60,13 @@ class PavicsUpdate(Process):
     def _handler(self,request,response):
         # Get the source and url to setup the update dictionary.
         update_id = request.inputs['id'][0].data
-        update_type = request.inputs['type'][0].data
+        if 'type' in request.inputs:
+            update_type = request.inputs['type'][0].data
+        else:
+            # workaround for poor handling of default values
+            for one_input in self.inputs:
+                if one_input.identifier == 'type':
+                    update_type = one_input.default
         if update_type is None:
             update_type = request.inputs['type'][0].default
         if update_type == 'File':

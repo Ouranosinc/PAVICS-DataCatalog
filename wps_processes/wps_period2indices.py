@@ -55,6 +55,13 @@ class Period2Indices(Process):
             status_supported=True)
 
     def _handler(self,request,response):
+        if 'calendar' in request.inputs:
+            calendar = request.inputs['calendar'][0].data
+        else:
+            # workaround for poor handling of default values
+            for one_input in self.inputs:
+                if one_input.identifier == 'calendar':
+                    calendar = one_input.default
         d = pavnc.period2indices(request.inputs['initial_date'][0].data,
                                  request.inputs['final_date'][0].data,
                                  request.inputs['opendap_url'][0].data,
