@@ -23,7 +23,7 @@ RUN cd /root && \
     chgrp apapywps /var/www/html/wps_results && \
     rm -rf /root/PyWPS && \
     cd /root && \
-    git clone -b PyPI_transition https://github.com/Ouranosinc/pyPavics.git && \
+    git clone -b get_point https://github.com/Ouranosinc/pyPavics.git && \
     cd /root/pyPavics && \
     python setup.py install && \
     rm -rf /root/pyPavics

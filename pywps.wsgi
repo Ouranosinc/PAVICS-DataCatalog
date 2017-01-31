@@ -11,6 +11,8 @@ from wps_pavicrawler import PavicsCrawler
 from wps_pavicsvalidate import PavicsValidate
 from wps_period2indices import Period2Indices
 from wps_ncplotly import NCPlotly
+from wps_getpoint import GetPoint
 
 application = Service(processes=[PavicsSearch(),PavicsUpdate(),PavicsCrawler(),
-                                 PavicsValidate(),Period2Indices(),NCPlotly()])
+                                 PavicsValidate(),Period2Indices(),NCPlotly(),
+                                 GetPoint()])
