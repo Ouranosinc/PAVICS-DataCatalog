@@ -34,6 +34,11 @@ class GetPoint(Process):
                                'NetCDF variable name',
                                data_type='string',
                                max_occurs=1000),
+                  LiteralInput('use_ordered_indices',
+                               'Whether ordered indices are used',
+                               data_type='boolean',
+                               default=False,
+                               min_occurs=0),
                   LiteralInput('ordered_indice',
                                'Indices for the point in the NetCDF variable',
                                data_type='integer',
@@ -90,15 +95,13 @@ class GetPoint(Process):
                     for x in self.inputs if x.identifier == input_name]
 
     def _dict_from_sep(self,xs,sep=':',convert=None):
-        if (not xs[0]) and (len(xs) == 1):
-            return None
         d = {}
         for x in xs:
             decode_x = x.split(sep)
             if convert is None:
-                d[decode_x[0]] = decode_x[1]
+                d[decode_x[0]] = sep.join(decode_x[1:])
             else:
-                d[decode_x[0]] = convert(decode_x[1])
+                d[decode_x[0]] = convert(sep.join(decode_x[1:]))
         return d
 
     def _handler(self, request, response):
@@ -106,21 +109,37 @@ class GetPoint(Process):
         g = self._dict_from_sep
         opendap_urls = f(request, 'opendap_url')
         var_names = f(request, 'variable')
-        ordered_indices = g(f(request, 'ordered_indice'),int)
-        named_indices = g(f(request, 'named_indice'),int)
-        nearest_to = g(f(request, 'nearest_to'),float)
-        thresholds = g(f(request, 'threshold'),float)
+        use_ordered_indices = f(request, 'use_ordered_indices')[0]
+        if not use_ordered_indices:
+            ordered_indices = None
+        else:
+            ordered_indices = map(int, f(request, 'ordered_indice'))
+        named_indices = f(request, 'named_indice')
+        if (len(named_indices) == 1) and (not named_indices[0]):
+            named_indices = None
+        else:
+            named_indices = g(named_indices, convert=int)
+        nearest_to = f(request, 'nearest_to')
+        if (len(nearest_to) == 1) and (not nearest_to[0]):
+            nearest_to = None
+        else:
+            d = {}
+            for x in nearest_to:
+                decode_x = x.split(':')
+                try:
+                    d[decode_x[0]] = float(':'.join(decode_x[1:]))
+                except ValueError:
+                    d[decode_x[0]] = ':'.join(decode_x[1:])
+            nearest_to = d
+        thresholds = f(request, 'threshold')
+        if (len(thresholds) == 1) and (not thresholds[0]):
+            thresholds = None
+        else:
+            thresholds = g(thresholds, convert=float)
 
-        # point_result = nccombo.get_point()
-
-        d = {}
-        d['opendap_urls'] = str(opendap_urls)
-        d['var_names'] = str(var_names)
-        d['ordered_indices'] = str(ordered_indices)
-        d['named_indices'] = str(named_indices)
-        d['nearest_to'] = str(nearest_to)
-        d['thresholds'] = str(thresholds)
-        point_result = d
+        point_result = nccombo.get_point(opendap_urls, var_names,
+                                         ordered_indices, named_indices,
+                                         nearest_to, thresholds)
 
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
