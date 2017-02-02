@@ -9,9 +9,8 @@ RUN apt-get -yqq update && \
     pip install threddsclient
 
 RUN cd /root && \
-    git clone https://github.com/geopython/PyWPS.git && \
-    cd /root/PyWPS && \
-    git reset --hard 7e7e12e3662287f0ec454f976d91381aee73bcfc && \
+    git clone -b fix228 https://github.com/bstdenis/pywps.git && \
+    cd /root/pywps && \
     python setup.py install && \
     mkdir /var/www/html/wps && \
     mkdir /var/www/html/wps_results && \
@@ -21,9 +20,9 @@ RUN cd /root && \
     chgrp apapywps /home/apapywps && \
     chown apapywps /var/www/html/wps_results && \
     chgrp apapywps /var/www/html/wps_results && \
-    rm -rf /root/PyWPS && \
+    rm -rf /root/pywps && \
     cd /root && \
-    git clone -b PyPI_transition https://github.com/Ouranosinc/pyPavics.git && \
+    git clone -b get_point https://github.com/Ouranosinc/pyPavics.git && \
     cd /root/pyPavics && \
     python setup.py install && \
     rm -rf /root/pyPavics
