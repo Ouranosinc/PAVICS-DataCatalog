@@ -1,7 +1,7 @@
 import os
 import time
 from pywps import Process,get_format,configuration
-from pywps import ComplexOutput
+from pywps import LiteralInput,ComplexOutput
 
 from pavics import catalog
 
@@ -49,7 +49,12 @@ external_ip = env_solr_host
 
 class PavicsCrawler(Process):
     def __init__(self):
-        inputs = []
+        inputs = [LiteralInput('target_files',
+                               'Files to crawl',
+                               data_type='string',
+                               default='',
+                               min_occurs=0,
+                               max_occurs=10000)]
         outputs = [ComplexOutput('crawler_result',
                                  'PAVICS Crawler Result',
                                  supported_formats=[json_format])]
@@ -66,11 +71,19 @@ class PavicsCrawler(Process):
             status_supported=True)
 
     def _handler(self,request,response):
+        if 'target_files' in request.inputs:
+            target_files = []
+            for i in range(len(request.inputs['target_files'])):
+                target_files.append(request.inputs['target_files'][i].data)
+        else:
+            # workaround for poor handling of default values
+            target_files = None
         update_result = catalog.pavicrawler(
             thredds_server,solr_server,my_facets,set_dataset_id=True,
             internal_ip=internal_ip,external_ip=external_ip,
             output_internal_ip=True,
-            wms_alternate_server=wms_alternate_server)
+            wms_alternate_server=wms_alternate_server,
+            target_files=target_files)
 
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
