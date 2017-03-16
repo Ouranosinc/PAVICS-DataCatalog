@@ -1,7 +1,7 @@
 import os
 import time
-from pywps import Process,get_format,configuration
-from pywps import LiteralInput,ComplexOutput
+from pywps import Process, get_format, configuration
+from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
@@ -11,7 +11,7 @@ env_thredds_host = os.environ['THREDDS_HOST']
 if 'OPENSTACK_INTERNAL_IP' in os.environ:
     env_openstack_internal_ip = os.environ['OPENSTACK_INTERNAL_IP']
 else:
-	env_openstack_internal_ip = os.environ['SOLR_HOST']
+    env_openstack_internal_ip = os.environ['SOLR_HOST']
 if 'WMS_ALTERNATE_SERVER' in os.environ:
     wms_alternate_server = os.environ['WMS_ALTERNATE_SERVER']
 else:
@@ -26,7 +26,7 @@ else:
 
 # The list of metadata to scan should be in a config file, let's input
 # it manually for now:
-my_facets = ['experiment','frequency','institute','model','project']
+my_facets = ['experiment', 'frequency', 'institute', 'model', 'project']
 # variable, variable_long_name and cf_standard_name, are not necessarily
 # in the global attributes, need to come back for this later...
 
@@ -36,7 +36,7 @@ thredds_server = 'http://%s/thredds' % (env_thredds_host,)
 solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
 # The user under which apache is running must be able to write to that
 # directory.
-json_output_path = configuration.get_config_value('server','outputpath')
+json_output_path = configuration.get_config_value('server', 'outputpath')
 
 json_format = get_format('JSON')
 gmlxml_format = get_format('GML')
@@ -60,7 +60,7 @@ class PavicsCrawler(Process):
                                  supported_formats=[json_format])]
         outputs[0].as_reference = True
 
-        super(PavicsCrawler,self).__init__(
+        super(PavicsCrawler, self).__init__(
             self._handler,
             identifier='pavicrawler',
             title='PAVICS Crawler',
@@ -70,7 +70,7 @@ class PavicsCrawler(Process):
             store_supported=True,
             status_supported=True)
 
-    def _handler(self,request,response):
+    def _handler(self, request, response):
         if 'target_files' in request.inputs:
             target_files = []
             for i in range(len(request.inputs['target_files'])):
@@ -79,17 +79,17 @@ class PavicsCrawler(Process):
             # workaround for poor handling of default values
             target_files = None
         update_result = catalog.pavicrawler(
-            thredds_server,solr_server,my_facets,set_dataset_id=True,
-            internal_ip=internal_ip,external_ip=external_ip,
+            thredds_server, solr_server, my_facets, set_dataset_id=True,
+            internal_ip=internal_ip, external_ip=external_ip,
             output_internal_ip=True,
             wms_alternate_server=wms_alternate_server,
             target_files=target_files)
 
         # Here we construct a unique filename
-        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         output_file_name = "solr_result_%s_.json" % (time_str,)
-        output_file = os.path.join(json_output_path,output_file_name)
-        f1 = open(output_file,'w')
+        output_file = os.path.join(json_output_path, output_file_name)
+        f1 = open(output_file, 'w')
         f1.write(update_result)
         f1.close()
         response.outputs['crawler_result'].file = output_file
