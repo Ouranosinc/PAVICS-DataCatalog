@@ -36,7 +36,7 @@ thredds_server = 'http://%s/thredds' % (env_thredds_host,)
 solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
 # The user under which apache is running must be able to write to that
 # directory.
-json_output_path = configuration.get_config_value('server', 'outputpath')
+output_path = configuration.get_config_value('server', 'outputpath')
 
 json_format = get_format('JSON')
 gmlxml_format = get_format('GML')
@@ -118,7 +118,7 @@ class PavicsCrawler(Process):
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         output_file_name = "solr_result_%s_.json" % (time_str,)
-        output_file = os.path.join(json_output_path, output_file_name)
+        output_file = os.path.join(output_path, output_file_name)
         f1 = open(output_file, 'w')
         f1.write(update_result)
         f1.close()
