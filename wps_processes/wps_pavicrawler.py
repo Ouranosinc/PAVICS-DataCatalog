@@ -89,12 +89,12 @@ class PavicsCrawler(Process):
         dictConfig({'version':1,
                     'disable_existing_loggers': False,
                     'formatters': {'standard': {'format': lf}},
-                    'handlers': {'logfile': {'level': 'INFO',
+                    'handlers': {'logfile': {'level': 'DEBUG',
                                              'class': 'logging.FileHandler',
                                              'filename': log_file,
                                              'formatter': 'standard'}},
                     'loggers': {'': {'handlers': ['logfile'],
-                                     'level': 'INFO',
+                                     'level': 'DEBUG',
                                      'propagate': True}}})
 
         if 'target_files' in request.inputs:
@@ -113,7 +113,8 @@ class PavicsCrawler(Process):
                 wms_alternate_server=wms_alternate_server,
                 target_files=target_files)
         except:
-            logger.error('Function raised an Exception', exc_info=True)
+            logger.error('catalog.pavicrawler raised an Exception',
+                         exc_info=True)
             update_result = json.dumps({'Exception': 'check log file'})
 
         # Here we construct a unique filename
