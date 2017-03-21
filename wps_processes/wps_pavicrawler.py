@@ -79,14 +79,14 @@ class PavicsCrawler(Process):
 
     def _handler(self, request, response):
         # Here we construct a unique filename
-        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         log_file_name = "log_file_%s_" % (time_str,)
         log_file = os.path.join(output_path, log_file_name)
         import logging
         from logging.config import dictConfig
         logger = logging.getLogger(__name__)
         lf = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        dictConfig({'version':1,
+        dictConfig({'version': 1,
                     'disable_existing_loggers': False,
                     'formatters': {'standard': {'format': lf}},
                     'handlers': {'logfile': {'level': 'DEBUG',
