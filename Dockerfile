@@ -9,7 +9,7 @@ RUN apt-get -yqq update && \
     pip install threddsclient
 
 RUN cd /root && \
-    git clone -b fix228 https://github.com/bstdenis/pywps.git && \
+    git clone -b fix_async https://github.com/bstdenis/pywps.git && \
     cd /root/pywps && \
     python setup.py install && \
     mkdir /var/www/html/wps && \
