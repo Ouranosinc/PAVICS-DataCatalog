@@ -30,7 +30,7 @@ RUN cd /root && \
 COPY pywps.wsgi /var/www/html/wps/
 COPY apache2.conf /etc/apache2/
 COPY pywps.cfg /etc/
-COPY wps_processes/wps_*.py /var/www/html/wps/
+COPY pavics_datacatalog/wps_processes/wps_*.py /var/www/html/wps/
 COPY catalog.cfg /home/
 
 CMD export SOLR_HOST=$(grep --only-matching --perl-regex "(?<=SOLR_HOST\=).*" /home/catalog.cfg) && \
