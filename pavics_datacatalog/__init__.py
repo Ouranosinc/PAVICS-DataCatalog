@@ -1,0 +1,2 @@
+from pavics_datacatalog import wps_processes
+from pavics_datacatalog.wps_processes import processes

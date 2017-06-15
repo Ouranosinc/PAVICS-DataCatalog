@@ -5,7 +5,7 @@ from pywps import LiteralInput,ComplexOutput
 
 from pavics import catalog
 
-env_solr_host = os.environ['SOLR_HOST']
+env_solr_host = os.environ.get('SOLR_HOST', None)
 
 # Example usage:
 # localhost/pywps?service=WPS&request=execute&version=1.0.0&\
