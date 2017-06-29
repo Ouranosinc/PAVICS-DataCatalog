@@ -5,13 +5,17 @@ RUN apt-get -yqq update && \
                          python-scipy python-netcdf4 python-matplotlib \
                          python-mpltoolkits.basemap python-pip apache2 \
                          libapache2-mod-wsgi python-setuptools python-lxml \
-                         git-core && \
+                         python-future git-core && \
     pip install threddsclient && \
     pip install https://github.com/bstdenis/pywps/archive/fix_async.zip && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/minmax.zip && \
-    pip install https://github.com/Ouranosinc/PAVICS-DataCatalog/archive/package.zip
+    pip install https://github.com/Ouranosinc/pyPavics/archive/minmax.zip
 
-RUN mkdir /var/www/html/wps && \
+COPY . /root/
+
+RUN cd /root && \
+    python setup.py install && \
+    rm -rf * && \
+    mkdir /var/www/html/wps && \
     mkdir /var/www/html/wps_results && \
     useradd apapywps && \
     mkdir /home/apapywps && \
