@@ -16,7 +16,7 @@ Running the application:
 
 The available processes can be obtained at:
 
-    http://localhost:8009/pywps?service=WPS&request=GetCapabilities&version=1.0.0
+        http://localhost:8009/pywps?service=WPS&request=GetCapabilities&version=1.0.0
 
 The pywps config file (pywps.cfg) is available. However, the outputurl
 and outputpath values should not be modified as they are currently

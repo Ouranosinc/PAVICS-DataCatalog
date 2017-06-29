@@ -6,31 +6,25 @@ RUN apt-get -yqq update && \
                          python-mpltoolkits.basemap python-pip apache2 \
                          libapache2-mod-wsgi python-setuptools python-lxml \
                          git-core && \
-    pip install threddsclient
+    pip install threddsclient && \
+    pip install https://github.com/bstdenis/pywps/archive/fix_async.zip && \
+    pip install https://github.com/Ouranosinc/pyPavics/archive/minmax.zip && \
+    pip install https://github.com/Ouranosinc/PAVICS-DataCatalog/archive/package.zip
 
-RUN cd /root && \
-    git clone -b fix_async https://github.com/bstdenis/pywps.git && \
-    cd /root/pywps && \
-    python setup.py install && \
-    mkdir /var/www/html/wps && \
+RUN mkdir /var/www/html/wps && \
     mkdir /var/www/html/wps_results && \
     useradd apapywps && \
     mkdir /home/apapywps && \
     chown apapywps /home/apapywps && \
     chgrp apapywps /home/apapywps && \
     chown apapywps /var/www/html/wps_results && \
-    chgrp apapywps /var/www/html/wps_results && \
-    rm -rf /root/pywps && \
-    cd /root && \
-    git clone -b minmax https://github.com/Ouranosinc/pyPavics.git && \
-    cd /root/pyPavics && \
-    python setup.py install && \
-    rm -rf /root/pyPavics
+    chgrp apapywps /var/www/html/wps_results
+
+
 
 COPY pywps.wsgi /var/www/html/wps/
 COPY apache2.conf /etc/apache2/
 COPY pywps.cfg /etc/
-COPY pavics_datacatalog/wps_processes/wps_*.py /var/www/html/wps/
 COPY catalog.cfg /home/
 
 CMD export SOLR_HOST=$(grep --only-matching --perl-regex "(?<=SOLR_HOST\=).*" /home/catalog.cfg) && \
