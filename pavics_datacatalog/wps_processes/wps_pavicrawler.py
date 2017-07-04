@@ -28,7 +28,7 @@ my_facets = ['experiment', 'frequency', 'institute', 'model', 'project']
 
 thredds_servers = []
 for thredds_server in env_thredds_host.split(','):
-    thredds_servers.append('http://{0}/thredds'.format(thredds_server.split()))
+    thredds_servers.append('http://{0}/thredds'.format(thredds_server.strip()))
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
 solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
