@@ -25,7 +25,9 @@ my_facets = ['experiment', 'frequency', 'institute', 'model', 'project']
 # variable, variable_long_name and cf_standard_name, are not necessarily
 # in the global attributes, need to come back for this later...
 
-thredds_server = 'http://%s/thredds' % (env_thredds_host,)
+thredds_servers = []
+for thredds_server in env_thredds_host.split(','):
+    thredds_servers.append('http://{0}/thredds'.format(thredds_server.split()))
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
 solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
@@ -100,12 +102,13 @@ class PavicsCrawler(Process):
             target_files = None
 
         try:
-            update_result = catalog.pavicrawler(
-                thredds_server, solr_server, my_facets, set_dataset_id=True,
-                internal_ip=internal_ip, external_ip=external_ip,
-                output_internal_ip=True,
-                wms_alternate_server=wms_alternate_server,
-                target_files=target_files)
+            for thredds_server in thredds_servers:
+                update_result = catalog.pavicrawler(
+                    thredds_server, solr_server, my_facets,
+                    set_dataset_id=True, internal_ip=internal_ip,
+                    external_ip=external_ip, output_internal_ip=True,
+                    wms_alternate_server=wms_alternate_server,
+                    target_files=target_files)
         except:
             logger.error('catalog.pavicrawler raised an Exception',
                          exc_info=True)
