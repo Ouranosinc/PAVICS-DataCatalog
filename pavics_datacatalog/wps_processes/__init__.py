@@ -6,11 +6,11 @@ from .wps_pavicsupdate import PavicsUpdate
 from .wps_pavicsvalidate import PavicsValidate
 from .wps_period2indices import Period2Indices
 
-processes = [GetPoint(),
-            NCPlotly(),
-            PavicsCrawler(),
-            PavicsSearch(),
-            PavicsUpdate(),
-            PavicsValidate(),
-            Period2Indices(),
-            ]
+processes = [
+    GetPoint(),
+    NCPlotly(),
+    PavicsCrawler(),
+    PavicsSearch(),
+    PavicsUpdate(),
+    PavicsValidate(),
+    Period2Indices()]
