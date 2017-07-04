@@ -12,7 +12,7 @@ output files will be available in the catalog.cfg file.
 
 Running the application:
 
-    docker run --name my_pavicswps -d -p 8009:80 pavics-datacatalog
+    docker run --name pavics-datacatalog1 -d -p 8009:80 pavics-datacatalog
 
 The available processes can be obtained at:
 
