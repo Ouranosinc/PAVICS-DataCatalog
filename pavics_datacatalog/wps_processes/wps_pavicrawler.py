@@ -1,6 +1,6 @@
 import os
 import time
-import json
+import traceback
 from pywps import Process, get_format, configuration
 from pywps import LiteralInput, ComplexOutput
 
@@ -9,7 +9,8 @@ from pavics import catalog
 env_solr_host = os.environ.get('SOLR_HOST', None)
 env_thredds_host = os.environ.get('THREDDS_HOST', None)
 # OPENSTACK support is obsolete
-env_openstack_internal_ip = os.environ.get('OPENSTACK_INTERNAL_IP', os.environ.get('SOLR_HOST', None))
+env_openstack_internal_ip = os.environ.get(
+    'OPENSTACK_INTERNAL_IP', os.environ.get('SOLR_HOST', None))
 wms_alternate_server = os.environ.get('WMS_ALTERNATE_SERVER', None)
 
 # Example usage:
@@ -51,16 +52,11 @@ class PavicsCrawler(Process):
         inputs = [LiteralInput('target_files',
                                'Files to crawl',
                                data_type='string',
-                               default='',
                                min_occurs=0,
                                max_occurs=10000)]
         outputs = [ComplexOutput('crawler_result',
                                  'PAVICS Crawler Result',
                                  supported_formats=[json_format],
-                                 as_reference=True),
-                   ComplexOutput('log_file',
-                                 'Log file',
-                                 supported_formats=[text_format],
                                  as_reference=True)]
 
         super(PavicsCrawler, self).__init__(
@@ -76,29 +72,12 @@ class PavicsCrawler(Process):
     def _handler(self, request, response):
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        log_file_name = "log_file_%s_" % (time_str,)
-        log_file = os.path.join(output_path, log_file_name)
-        import logging
-        from logging.config import dictConfig
-        logger = logging.getLogger(__name__)
-        lf = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        dictConfig({'version': 1,
-                    'disable_existing_loggers': False,
-                    'formatters': {'standard': {'format': lf}},
-                    'handlers': {'logfile': {'level': 'DEBUG',
-                                             'class': 'logging.FileHandler',
-                                             'filename': log_file,
-                                             'formatter': 'standard'}},
-                    'loggers': {'': {'handlers': ['logfile'],
-                                     'level': 'DEBUG',
-                                     'propagate': True}}})
 
         if 'target_files' in request.inputs:
             target_files = []
             for i in range(len(request.inputs['target_files'])):
                 target_files.append(request.inputs['target_files'][i].data)
         else:
-            # workaround for poor handling of default values
             target_files = None
 
         try:
@@ -110,9 +89,7 @@ class PavicsCrawler(Process):
                     wms_alternate_server=wms_alternate_server,
                     target_files=target_files)
         except:
-            logger.error('catalog.pavicrawler raised an Exception',
-                         exc_info=True)
-            update_result = json.dumps({'Exception': 'check log file'})
+            raise Exception(traceback.format_exc())
 
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -123,6 +100,4 @@ class PavicsCrawler(Process):
         f1.close()
         response.outputs['crawler_result'].file = output_file
         response.outputs['crawler_result'].output_format = json_format
-        response.outputs['log_file'].file = log_file
-        response.outputs['log_file'].output_format = text_format
         return response
