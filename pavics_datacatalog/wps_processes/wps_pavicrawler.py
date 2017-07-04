@@ -6,17 +6,11 @@ from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
-env_solr_host = os.environ['SOLR_HOST']
-env_thredds_host = os.environ['THREDDS_HOST']
+env_solr_host = os.environ.get('SOLR_HOST', None)
+env_thredds_host = os.environ.get('THREDDS_HOST', None)
 # OPENSTACK support is obsolete
-if 'OPENSTACK_INTERNAL_IP' in os.environ:
-    env_openstack_internal_ip = os.environ['OPENSTACK_INTERNAL_IP']
-else:
-    env_openstack_internal_ip = os.environ['SOLR_HOST']
-if 'WMS_ALTERNATE_SERVER' in os.environ:
-    wms_alternate_server = os.environ['WMS_ALTERNATE_SERVER']
-else:
-    wms_alternate_server = None
+env_openstack_internal_ip = os.environ.get('OPENSTACK_INTERNAL_IP', os.environ.get('SOLR_HOST', None))
+wms_alternate_server = os.environ.get('WMS_ALTERNATE_SERVER', None)
 
 # Example usage:
 # localhost/pywps?service=WPS&request=execute&version=1.0.0&\
