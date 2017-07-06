@@ -31,7 +31,7 @@ for thredds_server in env_thredds_host.split(','):
     thredds_servers.append('http://{0}/thredds'.format(thredds_server.strip()))
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
+solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
 # The user under which apache is running must be able to write to that
 # directory.
 output_path = configuration.get_config_value('server', 'outputpath')
@@ -53,7 +53,11 @@ class PavicsCrawler(Process):
                                'Files to crawl',
                                data_type='string',
                                min_occurs=0,
-                               max_occurs=10000)]
+                               max_occurs=10000),
+                  LiteralInput('target_thredds',
+                               'Thredds server to scan',
+                               data_type='string',
+                               min_occurs=0)]
         outputs = [ComplexOutput('crawler_result',
                                  'PAVICS Crawler Result',
                                  supported_formats=[json_format],
@@ -70,9 +74,6 @@ class PavicsCrawler(Process):
             status_supported=True)
 
     def _handler(self, request, response):
-        # Here we construct a unique filename
-        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-
         if 'target_files' in request.inputs:
             target_files = []
             for i in range(len(request.inputs['target_files'])):
@@ -80,8 +81,20 @@ class PavicsCrawler(Process):
         else:
             target_files = None
 
+        # If a target thredds server is specified, it must be in the list
+        # of thredds servers from the config, otherwise we fall back to
+        # scanning all thredds servers.
+        # Suggestion: decompose the target_thredds and compare individual
+        # sections of the url/port to allow more flexibility in the
+        # comparison.
+        if ('target_thredds' in request.inputs) and \
+           (request.inputs['target_thredds'][0].data in thredds_servers):
+            target_thredds_servers = [request.inputs['target_thredds'][0].data]
+        else:
+            target_thredds_servers = thredds_servers
+
         try:
-            for thredds_server in thredds_servers:
+            for thredds_server in target_thredds_servers:
                 update_result = catalog.pavicrawler(
                     thredds_server, solr_server, my_facets,
                     set_dataset_id=True, internal_ip=internal_ip,
@@ -93,7 +106,7 @@ class PavicsCrawler(Process):
 
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        output_file_name = "solr_result_%s_.json" % (time_str,)
+        output_file_name = "solr_result_{0}_.json".format(time_str)
         output_file = os.path.join(output_path, output_file_name)
         f1 = open(output_file, 'w')
         f1.write(update_result)
