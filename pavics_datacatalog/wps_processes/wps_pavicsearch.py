@@ -101,6 +101,7 @@ class PavicsSearch(Process):
             self._handler,
             identifier='pavicsearch',
             title='PAVICS Catalogue Search',
+            abstract="Search the SOLR server catalog."
             version='0.1',
             inputs=inputs,
             outputs=outputs,

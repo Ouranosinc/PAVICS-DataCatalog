@@ -51,6 +51,7 @@ class PavicsUpdate(Process):
             self._handler,
             identifier='pavicsupdate',
             title='PAVICS Catalogue Update',
+            abstract="Update a SOLR server entry."
             version='0.1',
             inputs=inputs,
             outputs=outputs,
