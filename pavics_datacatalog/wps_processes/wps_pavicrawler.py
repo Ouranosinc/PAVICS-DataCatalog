@@ -6,6 +6,10 @@ from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
+#TODO: I suggest to move that configuration stuff into a config.py file which create an `env` variable that can be used elsewhere. Talk to Fred about the best way to go about it.
+#TODO: Change the name of the process. It not only crawls but also update the SOLR server.
+# How about making the THREDDS and SOLR servers explicit in the call, ie as inputs? I think better yet would be the crawling process and the update process.
+
 env_solr_host = os.environ.get('SOLR_HOST', None)
 env_thredds_host = os.environ.get('THREDDS_HOST', None)
 # OPENSTACK support is obsolete
@@ -47,13 +51,16 @@ external_ip = env_solr_host
 class PavicsCrawler(Process):
     def __init__(self):
         inputs = [LiteralInput('target_files',
-                               'Files to crawl',
+                               'Target files',
+                               abstract='Files to inspect.',
                                data_type='string',
                                default='',
                                min_occurs=0,
                                max_occurs=10000)]
-        outputs = [ComplexOutput('crawler_result',
-                                 'PAVICS Crawler Result',
+
+        outputs = [ComplexOutput('crawler_result', # name change?
+                                 'File metadata',
+                                 abstract='Dictionaries storing the metadata for each inspected netCDF file.',
                                  supported_formats=[json_format],
                                  as_reference=True),
                    ComplexOutput('log_file',
@@ -65,6 +72,7 @@ class PavicsCrawler(Process):
             self._handler,
             identifier='pavicrawler',
             title='PAVICS Crawler',
+            abstract="Inspect netCDF files, extract meta data describing its content and update the SOLR server.",
             version='0.1',
             inputs=inputs,
             outputs=outputs,

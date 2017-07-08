@@ -22,38 +22,47 @@ json_format = get_format('JSON')
 
 
 class GetPoint(Process):
+    """
+    Please explain what problem this process solves ? Is it used for the web interface (click and return value + metadata) ?
+    """
     def __init__(self):
         # From pywps4 code : time_format = '%Y-%m-%dT%H:%M:%S%z'
         # Is that a bug? %z should be %Z
         # Using 'string' data_type until this is corrected.
         inputs = [LiteralInput('opendap_url',
-                               'OPeNDAP url to NetCDF file',
+                               'OPeNDAP URL',
+                               abstract="An OPeNDAP URL pointing to the netCDF file.",
                                data_type='string',
                                max_occurs=100000),
                   LiteralInput('variable',
-                               'NetCDF variable name',
+                               'Variable name',
+                               abstract="Name of the netCDF variable.",
                                data_type='string',
                                max_occurs=1000),
                   LiteralInput('use_ordered_indices',
-                               'Whether ordered indices are used',
+                               'Use ordered indices',
+                               abstract='Whether or not ordered indices are used', # Je ne comprend pas ce que ça veut dire.
+                               abstract="",
                                data_type='boolean',
                                default=False,
                                min_occurs=0),
-                  LiteralInput('ordered_indice',
-                               'Indices for the point in the NetCDF variable',
+                  LiteralInput('ordered_indice',  # avec un s ? Est-ce qu'on a besoin de use_ordered_indices ?
+                               'Ordered indices',
+                               abstract='Selected point indices within the netCDF grid.',
                                data_type='integer',
                                default=0,
                                min_occurs=0,
                                max_occurs=10),
-                  LiteralInput('named_indice',
-                               'Indices for the point in the NetCDF variable' \
-                               ' with named dimensions (dim:indice)',
+                  LiteralInput('named_indice',  # avec un s ?
+                               'Named indices',
+                               abstract='Indices for the point in the NetCDF variable' \
+                               ' with named dimensions (dim:indice)', # Je ne comprend pas
                                data_type='string',
                                default='',
                                min_occurs=0,
                                max_occurs=10),
                   LiteralInput('nearest_to',
-                               'Nearest value for each dimension in the ' \
+                               abstract='Nearest value for each dimension in the ' \
                                'NetCDF variable for the point ' \
                                'with named dimensions (dim:value)',
                                data_type='string',
@@ -77,7 +86,7 @@ class GetPoint(Process):
             self._handler,
             identifier='getpoint',
             title='Point value from a NetCDF file',
-            abstract='Pending.',
+            abstract='Return the value of one or multiple variables at specified locations.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,
@@ -115,7 +124,7 @@ class GetPoint(Process):
         else:
             ordered_indices = map(int, f(request, 'ordered_indice'))
         named_indices = f(request, 'named_indice')
-        if (len(named_indices) == 1) and (not named_indices[0]):
+        if (len(named_indices) == 1) and (not named_indices[0]): #?
             named_indices = None
         else:
             named_indices = g(named_indices, convert=int)
