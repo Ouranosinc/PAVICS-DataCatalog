@@ -98,9 +98,9 @@ class PavicsCrawler(Process):
         try:
             for thredds_server in target_thredds_servers:
                 if '<HOST>' in wms_alternate_server:
+                    i = thredds_servers.index(thredds_server)
                     wms_with_host = wms_alternate_server.replace(
-                        '<HOST>',
-                        thredds_host[thredds_servers.index(thredds_server)])
+                        '<HOST>', thredds_host[i].split(':')[0])
                 else:
                     wms_with_host = wms_alternate_server
                 update_result = catalog.pavicrawler(
