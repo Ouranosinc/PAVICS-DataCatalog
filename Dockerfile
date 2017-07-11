@@ -8,7 +8,7 @@ RUN apt-get -yqq update && \
                          python-future git-core && \
     pip install threddsclient && \
     pip install https://github.com/bstdenis/pywps/archive/fix_async.zip && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/minmax.zip
+    pip install https://github.com/Ouranosinc/pyPavics/archive/master.zip
 
 COPY . /root/
 
