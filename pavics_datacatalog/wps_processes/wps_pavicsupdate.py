@@ -1,7 +1,8 @@
 import os
 import time
-from pywps import Process,get_format,configuration
-from pywps import LiteralInput,ComplexOutput
+import traceback
+from pywps import Process, get_format, configuration
+from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
@@ -17,10 +18,10 @@ env_solr_host = os.environ.get('SOLR_HOST', None)
 
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
+solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
 # The user under which apache is running must be able to write to that
 # directory.
-json_output_path = configuration.get_config_value('server','outputpath')
+json_output_path = configuration.get_config_value('server', 'outputpath')
 
 json_format = get_format('JSON')
 gmlxml_format = get_format('GML')
@@ -41,13 +42,13 @@ class PavicsUpdate(Process):
                                mode=None),
                   LiteralInput('updates',
                                'Fields to update with their new values',
-                               data_type='string'),]
+                               data_type='string')]
         outputs = [ComplexOutput('update_result',
                                  'PAVICS Catalogue Update Result',
                                  supported_formats=[json_format])]
         outputs[0].as_reference = True
 
-        super(PavicsUpdate,self).__init__(
+        super(PavicsUpdate, self).__init__(
             self._handler,
             identifier='pavicsupdate',
             title='PAVICS Catalogue Update',
@@ -57,7 +58,7 @@ class PavicsUpdate(Process):
             store_supported=True,
             status_supported=True)
 
-    def _handler(self,request,response):
+    def _handler(self, request, response):
         # Get the source and url to setup the update dictionary.
         update_id = request.inputs['id'][0].data
         if 'type' in request.inputs:
@@ -70,9 +71,9 @@ class PavicsUpdate(Process):
         if update_type is None:
             update_type = request.inputs['type'][0].default
         if update_type == 'File':
-            update_dict = {'id':update_id}
+            update_dict = {'id': update_id}
         elif update_type == 'Dataset':
-            update_dict = {'dataset_id':update_id}
+            update_dict = {'dataset_id': update_id}
         else:
             raise NotImplementedError()
         # Get updates, which are the facets to add/modify.
@@ -85,15 +86,18 @@ class PavicsUpdate(Process):
             # in birdhouse-solr. Instead it's like adding a new entry, but
             # since the source and url already exist, it will update the other
             # fields.
-            update_dict.update({kv[0]:kv[1]})
+            update_dict.update({kv[0]: kv[1]})
 
-        update_result = catalog.pavicsupdate(solr_server,update_dict)
+        try:
+            update_result = catalog.pavicsupdate(solr_server, update_dict)
+        except:
+            raise Exception(traceback.format_exc())
 
         # Here we construct a unique filename
-        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
-        output_file_name = "solr_result_%s_.json" % (time_str,)
-        output_file = os.path.join(json_output_path,output_file_name)
-        f1 = open(output_file,'w')
+        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        output_file_name = "solr_result_{0}_.json".format(time_str)
+        output_file = os.path.join(json_output_path, output_file_name)
+        f1 = open(output_file, 'w')
         f1.write(update_result)
         f1.close()
         response.outputs['update_result'].file = output_file

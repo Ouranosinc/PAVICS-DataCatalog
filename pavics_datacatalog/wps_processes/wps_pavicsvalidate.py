@@ -1,8 +1,9 @@
 import os
 import time
 import json
-from pywps import Process,get_format,configuration
-from pywps import LiteralInput,ComplexOutput
+import traceback
+from pywps import Process, get_format, configuration
+from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
@@ -22,10 +23,10 @@ env_solr_host = os.environ.get('SOLR_HOST', None)
 
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://%s/solr/birdhouse/" % (env_solr_host,)
+solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
 # The user under which apache is running must be able to write to that
 # directory.
-json_output_path = configuration.get_config_value('server','outputpath')
+json_output_path = configuration.get_config_value('server', 'outputpath')
 
 json_format = get_format('JSON')
 gmlxml_format = get_format('GML')
@@ -47,13 +48,13 @@ class PavicsValidate(Process):
                                data_type='string',
                                default='',
                                min_occurs=0,
-                               mode=None),]
+                               mode=None)]
         outputs = [ComplexOutput('validation_result',
                                  'Validation result',
                                  supported_formats=[json_format])]
         outputs[0].as_reference = True
 
-        super(PavicsValidate,self).__init__(
+        super(PavicsValidate, self).__init__(
             self._handler,
             identifier='pavicsvalidate',
             title='PAVICS Catalogue Validation',
@@ -63,7 +64,7 @@ class PavicsValidate(Process):
             store_supported=True,
             status_supported=True)
 
-    def _handler(self,request,response):
+    def _handler(self, request, response):
         facets = request.inputs['facets'][0].data
         facets = facets.split(',')
         if 'paths' in request.inputs:
@@ -81,15 +82,18 @@ class PavicsValidate(Process):
         if files:
             files = files.split(',')
 
-        validate_result = catalog.pavicsvalidate(solr_server,facets,
-                                                 paths,files)
-        validate_result = json.dumps(validate_result)
+        try:
+            validate_result = catalog.pavicsvalidate(
+                solr_server, facets, paths, files)
+            validate_result = json.dumps(validate_result)
+        except:
+            raise Exception(traceback.format_exc())
 
         # Here we construct a unique filename
-        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
-        output_file_name = "json_result_%s_.json" % (time_str,)
-        output_file = os.path.join(json_output_path,output_file_name)
-        f1 = open(output_file,'w')
+        time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        output_file_name = "json_result_{0}_.json".format(time_str)
+        output_file = os.path.join(json_output_path, output_file_name)
+        f1 = open(output_file, 'w')
         f1.write(validate_result)
         f1.close()
         response.outputs['validation_result'].file = output_file
