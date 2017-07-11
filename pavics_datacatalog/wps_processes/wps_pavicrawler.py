@@ -26,9 +26,10 @@ my_facets = ['experiment', 'frequency', 'institute', 'model', 'project']
 # variable, variable_long_name and cf_standard_name, are not necessarily
 # in the global attributes, need to come back for this later...
 
+thredds_hosts = map(str.strip, env_thredds_host.split(','))
 thredds_servers = []
-for thredds_server in env_thredds_host.split(','):
-    thredds_servers.append('http://{0}/thredds'.format(thredds_server.strip()))
+for thredds_host in thredds_hosts:
+    thredds_servers.append('http://{0}/thredds'.format(thredds_host))
 # base_search_URL in the ESGF Search API is now a solr database URL,
 # this is provided as the environment variable SOLR_SERVER.
 solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
@@ -89,17 +90,24 @@ class PavicsCrawler(Process):
         # comparison.
         if ('target_thredds' in request.inputs) and \
            (request.inputs['target_thredds'][0].data in thredds_servers):
-            target_thredds_servers = [request.inputs['target_thredds'][0].data]
+            target_thredds_servers = ["http://{0}/thredds".format(
+                request.inputs['target_thredds'][0].data)]
         else:
             target_thredds_servers = thredds_servers
 
         try:
             for thredds_server in target_thredds_servers:
+                if '<HOST>' in wms_alternate_server:
+                    wms_with_host = wms_alternate_server.replace(
+                        '<HOST>',
+                        thredds_host[thredds_servers.index(thredds_server)])
+                else:
+                    wms_with_host = wms_alternate_server
                 update_result = catalog.pavicrawler(
                     thredds_server, solr_server, my_facets,
                     set_dataset_id=True, internal_ip=internal_ip,
                     external_ip=external_ip, output_internal_ip=True,
-                    wms_alternate_server=wms_alternate_server,
+                    wms_alternate_server=wms_with_host,
                     target_files=target_files)
         except:
             raise Exception(traceback.format_exc())
