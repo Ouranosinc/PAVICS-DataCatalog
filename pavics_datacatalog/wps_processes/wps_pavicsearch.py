@@ -6,8 +6,6 @@ from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
-env_solr_host = os.environ.get('SOLR_HOST', None)
-
 # Example usage:
 #
 # List facets values:
@@ -18,9 +16,6 @@ env_solr_host = os.environ.get('SOLR_HOST', None)
 # localhost/pywps?service=WPS&request=execute&version=1.0.0&\
 # identifier=pavicsearch&DataInputs=constraints=model:CRCM4,experiment:rcp85
 
-# base_search_URL in the ESGF Search API is now a solr database URL,
-# this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
 # The user under which apache is running must be able to write to that
 # directory.
 json_output_path = configuration.get_config_value('server', 'outputpath')
@@ -31,6 +26,10 @@ gmlxml_format = get_format('GML')
 
 class PavicsSearch(Process):
     def __init__(self):
+        env_solr_host = os.environ.get('SOLR_HOST', None)
+        # base_search_URL in the ESGF Search API is now a solr database URL,
+        # this is provided as the environment variable SOLR_SERVER.
+        self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
                                data_type='string',
@@ -109,58 +108,36 @@ class PavicsSearch(Process):
             status_supported=True)
 
     def _handler(self, request, response):
+        # So confused about pywps handling of default values...
+        # maybe not testing on the proper pywps branch...
         if 'facets' in request.inputs:
             facets = request.inputs['facets'][0].data
         else:
-            # workaround for poor handling of default values
             facets = None
         if 'limit' in request.inputs:
             limit = request.inputs['limit'][0].data
         else:
-            # workaround for poor handling of default values
-            for one_input in self.inputs:
-                if one_input.identifier == 'limit':
-                    limit = one_input.default
+            limit = 10
         if 'offset' in request.inputs:
             offset = request.inputs['offset'][0].data
         else:
-            # workaround for poor handling of default values
-            for one_input in self.inputs:
-                if one_input.identifier == 'offset':
-                    offset = one_input.default
-        if 'type' in request.inputs:
-            search_type = request.inputs['type'][0].data
-        else:
-            # workaround for poor handling of default values
-            for one_input in self.inputs:
-                if one_input.identifier == 'type':
-                    search_type = one_input.default
-        if 'format' in request.inputs:
-            output_format = request.inputs['format'][0].data
-        else:
-            # workaround for poor handling of default values
-            for one_input in self.inputs:
-                if one_input.identifier == 'format':
-                    output_format = one_input.default
-        if 'fields' in request.inputs:
-            fields = request.inputs['fields'][0].data
-        else:
-            # workaround for poor handling of default values
-            fields = None
+            offset = 0
+        search_type = request.inputs['type'][0].data
+        output_format = request.inputs['format'][0].data
+        # Not sure if the default should actually be forced to None here...
+        fields = request.inputs['fields'][0].data
         if 'constraints' in request.inputs:
             constraints = request.inputs['constraints'][0].data
         else:
-            # workaround for poor handling of default values
             constraints = None
         if 'query' in request.inputs:
             query = request.inputs['query'][0].data
         else:
-            # workaround for poor handling of default values
             query = None
 
         try:
             search_result = catalog.pavicsearch(
-                solr_server, facets, limit, offset, search_type, output_format,
+                self.solr_server, facets, limit, offset, search_type, output_format,
                 fields, constraints, query)
         except:
             raise Exception(traceback.format_exc())

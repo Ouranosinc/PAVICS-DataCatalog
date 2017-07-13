@@ -5,7 +5,7 @@ RUN apt-get -yqq update && \
                          python-scipy python-netcdf4 python-matplotlib \
                          python-mpltoolkits.basemap python-pip apache2 \
                          libapache2-mod-wsgi python-setuptools python-lxml \
-                         python-future git-core && \
+                         python-future python-requests git-core && \
     pip install threddsclient && \
     pip install https://github.com/bstdenis/pywps/archive/fix_async.zip && \
     pip install https://github.com/Ouranosinc/pyPavics/archive/master.zip
