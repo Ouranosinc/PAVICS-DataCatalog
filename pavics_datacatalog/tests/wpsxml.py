@@ -1,3 +1,4 @@
+import unittest
 from lxml import etree
 try:
     from urllib.request import urlopen, Request
@@ -80,3 +81,18 @@ def wps_response(wps_host, pywps_request, wps_client=None):
     else:
         resp = wps_client.get(pywps_request)
         return resp.get_data()
+
+
+def get_wps_xlink(xlink):
+    url_request = Request(url=xlink)
+    url_response = urlopen(url_request)
+    return url_response.read()
+
+
+def config_is_available(config_names, config_dict):
+    if not hasattr(config_names, '__iter__'):
+        config_names = [config_names]
+    for config_name in config_names:
+        if (config_name not in config_dict) or (not config_dict[config_name]):
+            raise unittest.SkipTest(
+                "{0} not defined in config.".format(config_name))

@@ -21,21 +21,30 @@ class TestPavicsearch(unittest.TestCase):
             self.config.read('configtests.cfg')
         else:
             self.config.read('pavics_datacatalog/tests/configtests.cfg')
-        self.config_dict = dict(self.config.items('pavicsearch'))
+        self.config_dict = dict(self.config.items('pavicrawler'))
         self.wps_host = self.config_dict['wps_host']
         self.solr_host = self.config_dict.get('solr_host', None)
+        self.thredds_host = self.config_dict.get('thredds_host', None)
+        self.wms_alternate_server = self.config_dict.get(
+            'wms_alternate_server', None)
         if not self.wps_host:
             if self.solr_host:
                 os.environ['SOLR_HOST'] = self.solr_host
+            if self.thredds_host:
+                os.environ['THREDDS_HOST'] = self.thredds_host
+            if self.wms_alternate_server:
+                os.environ['WMS_ALTERNATE_SERVER'] = self.wms_alternate_server
             try:
                 from pavics_datacatalog.wps_processes import \
-                    PavicsSearch
+                    PavicsCrawler, PavicsSearch
             except ImportError:
                 sys.path.append(os.path.join(
                     '/'.join(os.getcwd().split('/')[:-1]), 'wps_processes'))
+                from wps_pavicrawler import PavicsCrawler
                 from wps_pavicsearch import PavicsSearch
             self.client = WpsClient(
-                Service(processes=[PavicsSearch()]), WpsTestResponse)
+                Service(processes=[PavicsCrawler(), PavicsSearch()]),
+                WpsTestResponse)
         else:
             self.client = None
 
@@ -54,41 +63,37 @@ class TestPavicsearch(unittest.TestCase):
                 self.client)
             self.assertTrue(html_response)
 
-    def test_process_exists_pavicsearch(self):
+    def test_process_exists_pavicrawler(self):
         html_response = wpsxml.wps_response(
             self.wps_host,
             '?service=WPS&request=GetCapabilities&version=1.0.0',
             self.client)
         processes = wpsxml.parse_getcapabilities(html_response)
-        self.assertTrue('pavicsearch' in processes)
+        self.assertTrue('pavicrawler' in processes)
 
-    def test_describeprocess_pavicsearch(self):
+    def test_describeprocess_pavicrawler(self):
         html_response = wpsxml.wps_response(
             self.wps_host,
             ('?service=WPS&request=DescribeProcess&version=1.0.0&'
-             'identifier=pavicsearch'),
+             'identifier=pavicrawler'),
             self.client)
         describe_process = wpsxml.parse_describeprocess(html_response)
-        self.assertTrue('facets' in describe_process['inputs'])
-        self.assertTrue('search_result' in describe_process['outputs'])
+        self.assertTrue('target_files' in describe_process['inputs'])
+        self.assertTrue('crawler_result' in describe_process['outputs'])
 
-    def test_pavicsearch_01(self):
-        if (not self.wps_host) and (not self.solr_host):
-            raise unittest.SkipTest('Solr host not defined in config.')
-        html_response = wpsxml.wps_response(
-            self.wps_host,
-            ('?service=WPS&request=execute&version=1.0.0&'
-             'identifier=pavicsearch&DataInputs='),
-            self.client)
-        outputs = wpsxml.parse_execute_response(html_response)
-        self.assertTrue('search_result' in outputs['outputs'])
-
-    def test_pavicsearch_02(self):
-        # Search and WMS link validation
+    def test_pavicrawler_01(self):
+        # Crawl, then search and WMS link validation
         if (not self.wps_host) and (not self.solr_host):
             raise unittest.SkipTest('Solr host not defined in config.')
         wpsxml.config_is_available(
-            ['target_search', 'target_wms'], self.config_dict)
+            ['thredds_host', 'target_file', 'target_search', 'target_wms'],
+            self.config_dict)
+        html_response = wpsxml.wps_response(
+            self.wps_host,
+            ('?service=WPS&request=execute&version=1.0.0&'
+             'identifier=pavicrawler&DataInputs='
+             'target_files={0}').format(self.config_dict['target_file']),
+            self.client)
         html_response = wpsxml.wps_response(
             self.wps_host,
             ('?service=WPS&request=execute&version=1.0.0&'

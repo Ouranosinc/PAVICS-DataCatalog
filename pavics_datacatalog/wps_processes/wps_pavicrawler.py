@@ -6,13 +6,6 @@ from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
-env_solr_host = os.environ.get('SOLR_HOST', None)
-env_thredds_host = os.environ.get('THREDDS_HOST', None)
-# OPENSTACK support is obsolete
-env_openstack_internal_ip = os.environ.get(
-    'OPENSTACK_INTERNAL_IP', os.environ.get('SOLR_HOST', None))
-wms_alternate_server = os.environ.get('WMS_ALTERNATE_SERVER', None)
-
 # Example usage:
 # localhost/pywps?service=WPS&request=execute&version=1.0.0&\
 # identifier=pavicrawler&storeExecuteResponse=true&status=true&DataInputs=
@@ -26,13 +19,6 @@ my_facets = ['experiment', 'frequency', 'institute', 'model', 'project']
 # variable, variable_long_name and cf_standard_name, are not necessarily
 # in the global attributes, need to come back for this later...
 
-thredds_hosts = map(str.strip, env_thredds_host.split(','))
-thredds_servers = []
-for thredds_host in thredds_hosts:
-    thredds_servers.append('http://{0}/thredds'.format(thredds_host))
-# base_search_URL in the ESGF Search API is now a solr database URL,
-# this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
 # The user under which apache is running must be able to write to that
 # directory.
 output_path = configuration.get_config_value('server', 'outputpath')
@@ -42,14 +28,28 @@ gmlxml_format = get_format('GML')
 text_format = get_format('TEXT')
 
 
-# Fix for OpenStack internal/external ip:
-# (the internal ip is the environment variable OPENSTACK_INTERNAL_IP)
-internal_ip = env_openstack_internal_ip
-external_ip = env_solr_host
-
-
 class PavicsCrawler(Process):
     def __init__(self):
+        env_solr_host = os.environ.get('SOLR_HOST', None)
+        env_thredds_host = os.environ.get('THREDDS_HOST', '')
+        # OPENSTACK support is obsolete
+        env_openstack_internal_ip = os.environ.get(
+            'OPENSTACK_INTERNAL_IP', os.environ.get('SOLR_HOST', None))
+        self.wms_alternate_server = os.environ.get(
+            'WMS_ALTERNATE_SERVER', None)
+        self.thredds_hosts = map(str.strip, env_thredds_host.split(','))
+        self.thredds_servers = []
+        for thredds_host in self.thredds_hosts:
+            self.thredds_servers.append(
+                'http://{0}/thredds'.format(thredds_host))
+        # base_search_URL in the ESGF Search API is now a solr database URL,
+        # this is provided as the environment variable SOLR_SERVER.
+        self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
+        # Fix for OpenStack internal/external ip:
+        # (the internal ip is the environment variable OPENSTACK_INTERNAL_IP)
+        self.internal_ip = env_openstack_internal_ip
+        self.external_ip = env_solr_host
+
         inputs = [LiteralInput('target_files',
                                'Files to crawl',
                                data_type='string',
@@ -89,24 +89,24 @@ class PavicsCrawler(Process):
         # sections of the url/port to allow more flexibility in the
         # comparison.
         if ('target_thredds' in request.inputs) and \
-           (request.inputs['target_thredds'][0].data in thredds_servers):
+           (request.inputs['target_thredds'][0].data in self.thredds_servers):
             target_thredds_servers = ["http://{0}/thredds".format(
                 request.inputs['target_thredds'][0].data)]
         else:
-            target_thredds_servers = thredds_servers
+            target_thredds_servers = self.thredds_servers
 
         try:
             for thredds_server in target_thredds_servers:
-                if '<HOST>' in wms_alternate_server:
-                    i = thredds_servers.index(thredds_server)
-                    wms_with_host = wms_alternate_server.replace(
-                        '<HOST>', thredds_host[i].split(':')[0])
+                if '<HOST>' in self.wms_alternate_server:
+                    i = self.thredds_servers.index(thredds_server)
+                    wms_with_host = self.wms_alternate_server.replace(
+                        '<HOST>', self.thredds_hosts[i].split(':')[0])
                 else:
-                    wms_with_host = wms_alternate_server
+                    wms_with_host = self.wms_alternate_server
                 update_result = catalog.pavicrawler(
-                    thredds_server, solr_server, my_facets,
-                    set_dataset_id=True, internal_ip=internal_ip,
-                    external_ip=external_ip, output_internal_ip=True,
+                    thredds_server, self.solr_server, my_facets,
+                    set_dataset_id=True, internal_ip=self.internal_ip,
+                    external_ip=self.external_ip, output_internal_ip=True,
                     wms_alternate_server=wms_with_host,
                     target_files=target_files)
         except:

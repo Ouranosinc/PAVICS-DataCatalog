@@ -1,5 +1,6 @@
 import os
 import glob
+import unittest
 
 from setuptools import setup, find_packages
 
@@ -18,6 +19,12 @@ classifiers = [
     'Programming Language :: Python',
     'Topic :: Scientific/Engineering :: Atmospheric Science']
 
+def my_test_suite():
+    test_loader = unittest.TestLoader()
+    test_suite = test_loader.discover('pavics_datacatalog/tests',
+                                      pattern='test_*.py')
+    return test_suite
+
 setup(name='pavics_datacatalog',
       version='0.2',
       description='Processes for data catalog interactions',
@@ -33,7 +40,7 @@ setup(name='pavics_datacatalog',
           'wps_processes/wps_*.py')],
       include_package_data=True,
       zip_safe=False,
-      test_suite='',
+      test_suite='setup.my_test_suite',
       install_requires=reqs,
       entry_points={'console_scripts': []},
       )

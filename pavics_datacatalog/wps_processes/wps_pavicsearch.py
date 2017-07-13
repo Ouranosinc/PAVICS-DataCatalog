@@ -6,8 +6,6 @@ from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
-env_solr_host = os.environ.get('SOLR_HOST', None)
-
 # Example usage:
 #
 # List facets values:
@@ -18,9 +16,6 @@ env_solr_host = os.environ.get('SOLR_HOST', None)
 # localhost/pywps?service=WPS&request=execute&version=1.0.0&\
 # identifier=pavicsearch&DataInputs=constraints=model:CRCM4,experiment:rcp85
 
-# base_search_URL in the ESGF Search API is now a solr database URL,
-# this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
 # The user under which apache is running must be able to write to that
 # directory.
 json_output_path = configuration.get_config_value('server', 'outputpath')
@@ -31,6 +26,10 @@ gmlxml_format = get_format('GML')
 
 class PavicsSearch(Process):
     def __init__(self):
+        env_solr_host = os.environ.get('SOLR_HOST', None)
+        # base_search_URL in the ESGF Search API is now a solr database URL,
+        # this is provided as the environment variable SOLR_SERVER.
+        self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
                                data_type='string',
@@ -138,7 +137,7 @@ class PavicsSearch(Process):
 
         try:
             search_result = catalog.pavicsearch(
-                solr_server, facets, limit, offset, search_type, output_format,
+                self.solr_server, facets, limit, offset, search_type, output_format,
                 fields, constraints, query)
         except:
             raise Exception(traceback.format_exc())

@@ -6,8 +6,6 @@ from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
-env_solr_host = os.environ.get('SOLR_HOST', None)
-
 # Example usage:
 # localhost/pywps?service=WPS&request=execute&version=1.0.0&\
 # identifier=pavicsupdate&DataInputs=source=source_string;url=url_string;\
@@ -16,9 +14,6 @@ env_solr_host = os.environ.get('SOLR_HOST', None)
 # Still need to perhaps validate the inputs, and consider whether we want
 # to do updates that involve list of entries (not tested yet)
 
-# base_search_URL in the ESGF Search API is now a solr database URL,
-# this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
 # The user under which apache is running must be able to write to that
 # directory.
 json_output_path = configuration.get_config_value('server', 'outputpath')
@@ -29,6 +24,10 @@ gmlxml_format = get_format('GML')
 
 class PavicsUpdate(Process):
     def __init__(self):
+        env_solr_host = os.environ.get('SOLR_HOST', None)
+        # base_search_URL in the ESGF Search API is now a solr database URL,
+        # this is provided as the environment variable SOLR_SERVER.
+        self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
         # The combination of the 'source' and 'url' fields provide the 'id'
         # in the Solr database, they both must be provided.
         inputs = [LiteralInput('id',
@@ -89,7 +88,7 @@ class PavicsUpdate(Process):
             update_dict.update({kv[0]: kv[1]})
 
         try:
-            update_result = catalog.pavicsupdate(solr_server, update_dict)
+            update_result = catalog.pavicsupdate(self.solr_server, update_dict)
         except:
             raise Exception(traceback.format_exc())
 

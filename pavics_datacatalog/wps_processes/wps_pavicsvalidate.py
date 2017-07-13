@@ -7,8 +7,6 @@ from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
 
-env_solr_host = os.environ.get('SOLR_HOST', None)
-
 # Example usage:
 #
 # Check whether certain facets exist for all entries:
@@ -21,9 +19,6 @@ env_solr_host = os.environ.get('SOLR_HOST', None)
 # paths=sio%2Fsrtm30_plus_v6,ouranos%2Fsubdaily;\
 # files=srtm30_plus.nc,aev_shum_1961.nc
 
-# base_search_URL in the ESGF Search API is now a solr database URL,
-# this is provided as the environment variable SOLR_SERVER.
-solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
 # The user under which apache is running must be able to write to that
 # directory.
 json_output_path = configuration.get_config_value('server', 'outputpath')
@@ -34,6 +29,10 @@ gmlxml_format = get_format('GML')
 
 class PavicsValidate(Process):
     def __init__(self):
+        env_solr_host = os.environ.get('SOLR_HOST', None)
+        # base_search_URL in the ESGF Search API is now a solr database URL,
+        # this is provided as the environment variable SOLR_SERVER.
+        self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
         inputs = [LiteralInput('facets',
                                'Required facets',
                                data_type='string'),
@@ -84,7 +83,7 @@ class PavicsValidate(Process):
 
         try:
             validate_result = catalog.pavicsvalidate(
-                solr_server, facets, paths, files)
+                self.solr_server, facets, paths, files)
             validate_result = json.dumps(validate_result)
         except:
             raise Exception(traceback.format_exc())
