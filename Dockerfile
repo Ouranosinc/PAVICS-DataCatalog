@@ -11,10 +11,11 @@ RUN apt-get -yqq update && \
     pip install https://github.com/Ouranosinc/pyPavics/archive/master.zip
 
 COPY . /root/
+COPY configtests.cfg /root/pavics_datacatalog/tests/
 
 RUN cd /root && \
     python setup.py install && \
-    rm -rf * && \
+    python setup.py test && \
     mkdir /var/www/html/wps && \
     mkdir /var/www/html/wps_results && \
     useradd apapywps && \

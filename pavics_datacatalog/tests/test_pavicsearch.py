@@ -24,7 +24,7 @@ class TestPavicsearch(unittest.TestCase):
         try:
             self.config_dict = dict(self.config.items('pavicsearch'))
         except ConfigParser.NoSectionError:
-            raise unittest.SkipTest('No pavicsearch section in config.')
+            self.config_dict = {'wps_host': ''}
         self.wps_host = self.config_dict['wps_host']
         self.solr_host = self.config_dict.get('solr_host', None)
         if not self.wps_host:
