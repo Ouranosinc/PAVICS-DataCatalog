@@ -21,7 +21,10 @@ class TestPavicsearch(unittest.TestCase):
             self.config.read('configtests.cfg')
         else:
             self.config.read('pavics_datacatalog/tests/configtests.cfg')
-        self.config_dict = dict(self.config.items('pavicrawler'))
+        try:
+            self.config_dict = dict(self.config.items('pavicrawler'))
+        except ConfigParser.NoSectionError:
+            raise unittest.SkipTest('No pavicrawler section in config.')
         self.wps_host = self.config_dict['wps_host']
         self.solr_host = self.config_dict.get('solr_host', None)
         self.thredds_host = self.config_dict.get('thredds_host', None)
