@@ -1,5 +1,6 @@
 import os
 import sys
+import io
 import unittest
 import ConfigParser
 import json
@@ -24,7 +25,7 @@ class TestPavicsearch(unittest.TestCase):
         try:
             self.config_dict = dict(self.config.items('pavicrawler'))
         except ConfigParser.NoSectionError:
-            raise unittest.SkipTest('No pavicrawler section in config.')
+            self.config_dict = {'wps_host': ''}
         self.wps_host = self.config_dict['wps_host']
         self.solr_host = self.config_dict.get('solr_host', None)
         self.thredds_host = self.config_dict.get('thredds_host', None)
@@ -108,6 +109,26 @@ class TestPavicsearch(unittest.TestCase):
         search_json = json.loads(search_json)
         self.assertEqual(search_json['response']['docs'][0]['wms_url'],
                          self.config_dict['target_wms'])
+
+    def test_pavicrawler_missing_file(self):
+        # Missing file
+        wpsxml.config_is_available(
+            ['thredds_host', 'target_file_missing'],
+            self.config_dict)
+        # Need to redirect stderr since a test WpsClient will output the error
+        save_stderr = sys.stderr
+        sys.stderr = io.BytesIO()
+        html_response = wpsxml.wps_response(
+            self.wps_host,
+            ('?service=WPS&request=execute&version=1.0.0&'
+             'identifier=pavicrawler&DataInputs='
+             'target_files={0}').format(
+                self.config_dict['target_file_missing']),
+            self.client)
+        # Restoring stderr
+        sys.stderr = save_stderr
+        outputs = wpsxml.parse_execute_response(html_response)
+        self.assertEqual(outputs['status'], 'ProcessFailed')
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPavicsearch)
 
