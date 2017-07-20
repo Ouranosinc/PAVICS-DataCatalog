@@ -2,7 +2,7 @@ import os
 import time
 import traceback
 from pywps import Process, get_format, configuration
-from pywps import LiteralInput, ComplexOutput
+from pywps import LiteralInput, ComplexInput, ComplexOutput
 
 from pavics import catalog
 
@@ -24,8 +24,7 @@ my_facets = ['experiment', 'frequency', 'institute', 'model', 'project']
 output_path = configuration.get_config_value('server', 'outputpath')
 
 json_format = get_format('JSON')
-gmlxml_format = get_format('GML')
-text_format = get_format('TEXT')
+netcdf_format = get_format('NETCDF')
 
 
 class PavicsCrawler(Process):
@@ -50,9 +49,9 @@ class PavicsCrawler(Process):
         self.internal_ip = env_openstack_internal_ip
         self.external_ip = env_solr_host
 
-        inputs = [LiteralInput('target_files',
+        inputs = [ComplexInput('target_files',
                                'Files to crawl',
-                               data_type='string',
+                               supported_formats=[netcdf_format],
                                min_occurs=0,
                                max_occurs=10000),
                   LiteralInput('target_thredds',
