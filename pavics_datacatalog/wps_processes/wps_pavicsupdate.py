@@ -63,12 +63,7 @@ class PavicsUpdate(Process):
         if 'type' in request.inputs:
             update_type = request.inputs['type'][0].data
         else:
-            # workaround for poor handling of default values
-            for one_input in self.inputs:
-                if one_input.identifier == 'type':
-                    update_type = one_input.default
-        if update_type is None:
-            update_type = request.inputs['type'][0].default
+            update_type = 'File'
         if update_type == 'File':
             update_dict = {'id': update_id}
         elif update_type == 'Dataset':

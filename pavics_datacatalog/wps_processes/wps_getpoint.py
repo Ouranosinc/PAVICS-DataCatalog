@@ -26,47 +26,48 @@ class GetPoint(Process):
         # From pywps4 code : time_format = '%Y-%m-%dT%H:%M:%S%z'
         # Is that a bug? %z should be %Z
         # Using 'string' data_type until this is corrected.
-        inputs = [LiteralInput('opendap_url',
-                               'OPeNDAP url to NetCDF file',
-                               data_type='string',
-                               max_occurs=100000),
-                  LiteralInput('variable',
-                               'NetCDF variable name',
-                               data_type='string',
-                               max_occurs=1000),
-                  LiteralInput('use_ordered_indices',
-                               'Whether ordered indices are used',
-                               data_type='boolean',
-                               default=False,
-                               min_occurs=0),
-                  LiteralInput('ordered_indice',
-                               'Indices for the point in the NetCDF variable',
-                               data_type='integer',
-                               default=0,
-                               min_occurs=0,
-                               max_occurs=10),
-                  LiteralInput('named_indice',
-                               'Indices for the point in the NetCDF variable' \
-                               ' with named dimensions (dim:indice)',
-                               data_type='string',
-                               default='',
-                               min_occurs=0,
-                               max_occurs=10),
-                  LiteralInput('nearest_to',
-                               'Nearest value for each dimension in the ' \
-                               'NetCDF variable for the point ' \
-                               'with named dimensions (dim:value)',
-                               data_type='string',
-                               default='',
-                               min_occurs=0,
-                               max_occurs=10),
-                  LiteralInput('threshold',
-                               'Thresholds for the distance to each nearest ' \
-                               'value with named dimensions (dim:threshold)',
-                               data_type='string',
-                               default='',
-                               min_occurs=0,
-                               max_occurs=10)]
+        inputs = [
+            LiteralInput('opendap_url',
+                         'OPeNDAP url to NetCDF file',
+                         data_type='string',
+                         max_occurs=100000),
+            LiteralInput('variable',
+                         'NetCDF variable name',
+                         data_type='string',
+                         max_occurs=1000),
+            LiteralInput('use_ordered_indices',
+                         'Whether ordered indices are used',
+                         data_type='boolean',
+                         default=False,
+                         min_occurs=0),
+            LiteralInput('ordered_index',
+                         'Indices for the point in the NetCDF variable',
+                         data_type='integer',
+                         default=0,
+                         min_occurs=0,
+                         max_occurs=10),
+            LiteralInput('named_index',
+                         'Indices for the point in the NetCDF variable with '
+                         'named dimensions (dim:index)',
+                         data_type='string',
+                         default='',
+                         min_occurs=0,
+                         max_occurs=10),
+            LiteralInput('nearest_to',
+                         'Nearest value for each dimension in the NetCDF '
+                         'variable for the point with named dimensions '
+                         '(dim:value)',
+                         data_type='string',
+                         default='',
+                         min_occurs=0,
+                         max_occurs=10),
+            LiteralInput('threshold',
+                         'Thresholds for the distance to each nearest value '
+                         'with named dimensions (dim:threshold)',
+                         data_type='string',
+                         default='',
+                         min_occurs=0,
+                         max_occurs=10)]
 
         outputs = [ComplexOutput('point_result',
                                  'Information for the requested point',
@@ -84,17 +85,7 @@ class GetPoint(Process):
             store_supported=True,
             status_supported=True)
 
-    def _value_or_default(self, request, input_name):
-        if input_name in request.inputs:
-            return [request.inputs[input_name][n].data
-                    for n in range(len(request.inputs[input_name]))]
-            return request.inputs[input_name][0].data
-        else:
-            # workaround for poor handling of default values
-            return [x.default
-                    for x in self.inputs if x.identifier == input_name]
-
-    def _dict_from_sep(self,xs,sep=':',convert=None):
+    def _dict_from_sep(self, xs, sep=':', convert=None):
         d = {}
         for x in xs:
             decode_x = x.split(sep)
@@ -105,24 +96,35 @@ class GetPoint(Process):
         return d
 
     def _handler(self, request, response):
-        f = self._value_or_default
-        g = self._dict_from_sep
-        opendap_urls = f(request, 'opendap_url')
-        var_names = f(request, 'variable')
-        use_ordered_indices = f(request, 'use_ordered_indices')[0]
+        opendap_urls = [request.inputs['opendap_url'][n].data
+                        for n in range(len(request.inputs['opendap_url']))]
+
+        var_names = [request.inputs['variable'][n].data
+                     for n in range(len(request.inputs['variable']))]
+
+        if 'use_ordered_indices' in request.inputs:
+            use_ordered_indices = request.inputs['use_ordered_indices'][0].data
+        else:
+            use_ordered_indices = False
+
         if not use_ordered_indices:
             ordered_indices = None
         else:
-            ordered_indices = map(int, f(request, 'ordered_indice'))
-        named_indices = f(request, 'named_indice')
-        if (len(named_indices) == 1) and (not named_indices[0]):
+            ndims = len(request.inputs['ordered_index'])
+            ordered_indices = [request.inputs['ordered_index'][n].data
+                               for n in range(ndims)]
+
+        if 'named_index' in request.inputs:
+            ndims = len(request.inputs['named_index'])
+            named_indices = [request.inputs['named_index'][n].data
+                             for n in range(ndims)]
+            named_indices = self._dict_from_sep(named_indices, convert=int)
+        else:
             named_indices = None
-        else:
-            named_indices = g(named_indices, convert=int)
-        nearest_to = f(request, 'nearest_to')
-        if (len(nearest_to) == 1) and (not nearest_to[0]):
-            nearest_to = None
-        else:
+
+        if 'nearest_to' in request.inputs:
+            nearest_to = [request.inputs['nearest_to'][n].data
+                          for n in range(len(request.inputs['nearest_to']))]
             d = {}
             for x in nearest_to:
                 decode_x = x.split(':')
@@ -131,11 +133,15 @@ class GetPoint(Process):
                 except ValueError:
                     d[decode_x[0]] = ':'.join(decode_x[1:])
             nearest_to = d
-        thresholds = f(request, 'threshold')
-        if (len(thresholds) == 1) and (not thresholds[0]):
-            thresholds = None
         else:
-            thresholds = g(thresholds, convert=float)
+            nearest_to = None
+
+        if 'thresholds' in request.inputs:
+            thresholds = [request.inputs['threshold'][n].data
+                          for n in range(len(request.inputs['threshold']))]
+            thresholds = self.dict_from_sep(thresholds, convert=float)
+        else:
+            thresholds = None
 
         point_result = nccombo.get_point(opendap_urls, var_names,
                                          ordered_indices, named_indices,
