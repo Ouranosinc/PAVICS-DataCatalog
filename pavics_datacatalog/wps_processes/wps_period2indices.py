@@ -1,5 +1,5 @@
 from pywps import Process
-from pywps import LiteralInput,LiteralOutput
+from pywps import LiteralInput, LiteralOutput
 
 from pavics import netcdf as pavnc
 
@@ -34,16 +34,16 @@ class Period2Indices(Process):
                                data_type='string',
                                abstract=cal_abs,
                                default='gregorian',
-                               min_occurs=0),]
+                               min_occurs=0)]
         title_ini = 'Initial time index of the period in the NetCDF file'
         title_fin = 'Final time index of the period in the NetCDF file'
-        outputs = [LiteralOutput('initial_index',title_ini,
+        outputs = [LiteralOutput('initial_index', title_ini,
                                  data_type='integer'),
-                   LiteralOutput('final_index',title_fin,
+                   LiteralOutput('final_index', title_fin,
                                  data_type='integer',
-                                 abstract='The final index is inclusive.'),]
+                                 abstract='The final index is inclusive.')]
 
-        super(Period2Indices,self).__init__(
+        super(Period2Indices, self).__init__(
             self._handler,
             identifier='period2indices',
             title='NetCDF time indices from a period',
@@ -54,20 +54,15 @@ class Period2Indices(Process):
             store_supported=True,
             status_supported=True)
 
-    def _value_or_default(self,request,input_name):
-        if input_name in request.inputs:
-            return request.inputs[intput_name][0].data
+    def _handler(self, request, response):
+        if 'calendar' in request.inputs:
+            calendar = request.inputs['calendar'][0].data
         else:
-            # workaround for poor handling of default values
-            return [x.default
-                    for x in self.intputs if x.identifier == input_name][0]
-
-    def _handler(self,request,response):
-        calendar = self._value_or_default(request,'calendar')
+            calendar = 'gregorian'
         d = pavnc.period2indices(request.inputs['initial_date'][0].data,
                                  request.inputs['final_date'][0].data,
                                  request.inputs['opendap_url'][0].data,
-                                 calendar=request.inputs['calendar'][0].data)
+                                 calendar=calendar)
         response.outputs['initial_index'].data = d['initial_index']
         response.outputs['final_index'].data = d['final_index']
         return response
