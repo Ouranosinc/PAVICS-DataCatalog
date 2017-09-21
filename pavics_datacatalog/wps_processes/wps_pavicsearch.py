@@ -94,8 +94,13 @@ class PavicsSearch(Process):
         outputs = [ComplexOutput('search_result',
                                  'PAVICS Catalogue Search Result',
                                  supported_formats=[json_format,
-                                                    gmlxml_format])]
+                                                    gmlxml_format]),
+                   ComplexOutput('list_result',
+                                 'List of OPEnDAP urls of the search result',
+                                 supported_formats=[json_format])]
+        # as_reference now an argument in recent pywps versions?
         outputs[0].as_reference = True
+        outputs[1].as_reference = True
 
         super(PavicsSearch, self).__init__(
             self._handler,
@@ -152,13 +157,25 @@ class PavicsSearch(Process):
         else:
             # Unsupported format
             raise NotImplementedError()
+        list_file_name = "list_result_{0}_.json".format(time_str)
+
         output_file = os.path.join(json_output_path, output_file_name)
         f1 = open(output_file, 'w')
         f1.write(search_result)
         f1.close()
+        output_list_file = os.path.join(json_output_path, list_file_name)
+        f1 = open(output_list_file, 'w')
+        if search_type == 'Dataset':
+            f1.write("[]")
+        else:
+            f1.write(catalog.list_of_files_from_pavicsearch(search_result))
+        f1.close()
+
         response.outputs['search_result'].file = output_file
         if output_format == 'application/solr+json':
             response.outputs['search_result'].output_format = json_format
         elif output_format == 'application/solr+xml':
             response.outputs['search_result'].output_format = gmlxml_format
+        response.outputs['list_result'].file = output_list_file
+        response.outputs['list_result'].output_format = json_format
         return response
