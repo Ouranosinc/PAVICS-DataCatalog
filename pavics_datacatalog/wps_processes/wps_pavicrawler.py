@@ -1,6 +1,7 @@
 import os
 import time
 import traceback
+import json
 from pywps import Process, get_format, configuration
 from pywps import LiteralInput, ComplexOutput
 
@@ -108,7 +109,7 @@ class PavicsCrawler(Process):
         output_file_name = "solr_result_{0}_.json".format(time_str)
         output_file = os.path.join(output_path, output_file_name)
         f1 = open(output_file, 'w')
-        f1.write(update_result)
+        f1.write(json.dumps(update_result))
         f1.close()
         response.outputs['crawler_result'].file = output_file
         response.outputs['crawler_result'].output_format = json_format
