@@ -32,9 +32,6 @@ class PavicsCrawler(Process):
     def __init__(self):
         env_solr_host = os.environ.get('SOLR_HOST', None)
         env_thredds_host = os.environ.get('THREDDS_HOST', '')
-        # OPENSTACK support is obsolete
-        env_openstack_internal_ip = os.environ.get(
-            'OPENSTACK_INTERNAL_IP', os.environ.get('SOLR_HOST', None))
         self.wms_alternate_server = os.environ.get(
             'WMS_ALTERNATE_SERVER', None)
         self.thredds_hosts = map(str.strip, env_thredds_host.split(','))
@@ -45,10 +42,6 @@ class PavicsCrawler(Process):
         # base_search_URL in the ESGF Search API is now a solr database URL,
         # this is provided as the environment variable SOLR_SERVER.
         self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
-        # Fix for OpenStack internal/external ip:
-        # (the internal ip is the environment variable OPENSTACK_INTERNAL_IP)
-        self.internal_ip = env_openstack_internal_ip
-        self.external_ip = env_solr_host
 
         inputs = [LiteralInput('target_files',
                                'Files to crawl',
@@ -105,9 +98,7 @@ class PavicsCrawler(Process):
                     wms_with_host = self.wms_alternate_server
                 update_result = catalog.pavicrawler(
                     thredds_server, self.solr_server, my_facets,
-                    set_dataset_id=True, internal_ip=self.internal_ip,
-                    external_ip=self.external_ip, output_internal_ip=True,
-                    wms_alternate_server=wms_with_host,
+                    set_dataset_id=True, wms_alternate_server=wms_with_host,
                     target_files=target_files)
         except:
             raise Exception(traceback.format_exc())
