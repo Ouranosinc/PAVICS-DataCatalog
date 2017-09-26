@@ -1,6 +1,7 @@
 import os
 import time
 import traceback
+import json
 from pywps import Process, get_format, configuration
 from pywps import LiteralInput, ComplexOutput
 
@@ -161,14 +162,15 @@ class PavicsSearch(Process):
 
         output_file = os.path.join(json_output_path, output_file_name)
         f1 = open(output_file, 'w')
-        f1.write(search_result)
+        f1.write(json.dumps(search_result))
         f1.close()
         output_list_file = os.path.join(json_output_path, list_file_name)
         f1 = open(output_list_file, 'w')
         if search_type == 'Dataset':
             f1.write("[]")
         else:
-            f1.write(catalog.list_of_files_from_pavicsearch(search_result))
+            f1.write(json.dumps(
+                catalog.list_of_files_from_pavicsearch(search_result)))
         f1.close()
 
         response.outputs['search_result'].file = output_file
