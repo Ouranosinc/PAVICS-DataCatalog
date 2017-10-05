@@ -87,8 +87,8 @@ class NCPlotly(Process):
         super(NCPlotly,self).__init__(
             self._handler,
             identifier='ncplotly',
-            title='NetCDF plotly',
-            abstract='Obtain a plotly object.',
+            title='Plotly time series data from netCDF file.',
+            abstract='Return a dictionary storing the data necessary to create a simple plotly time series.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,
