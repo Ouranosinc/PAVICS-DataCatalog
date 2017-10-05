@@ -66,7 +66,7 @@ class PavicsCrawler(Process):
             self._handler,
             identifier='pavicrawler',
             title='PAVICS Crawler',
-            abstract='Crawl thredds server and write to database.',
+            abstract='Crawl thredds server and write metadata to SOLRabtra database.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,
