@@ -28,7 +28,8 @@ class Period2Indices(Process):
                                abstract='Format must be %Y-%m-%dT%H:%M:%S'),
                   LiteralInput('opendap_url',
                                'OPeNDAP url to a NetCDF file',
-                               data_type='string'),
+                               data_type='string',
+                               abstract='OPeNDAP url to a NetCDF file'),
                   LiteralInput('calendar',
                                'NetCDF calendar type',
                                data_type='string',
@@ -37,11 +38,11 @@ class Period2Indices(Process):
                                min_occurs=0)]
         title_ini = 'Initial time index of the period in the NetCDF file'
         title_fin = 'Final time index of the period in the NetCDF file'
+        abstract_fin = title_fin + '. The final index is inclusive.'
         outputs = [LiteralOutput('initial_index', title_ini,
-                                 data_type='integer'),
+                                 data_type='integer', abstract=title_ini),
                    LiteralOutput('final_index', title_fin,
-                                 data_type='integer',
-                                 abstract='The final index is inclusive.')]
+                                 data_type='integer', abstract=abstract_fin)]
 
         super(Period2Indices, self).__init__(
             self._handler,

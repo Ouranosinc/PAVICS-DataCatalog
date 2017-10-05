@@ -33,60 +33,77 @@ class PavicsSearch(Process):
         self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
+                               abstract=('Comma separated list of facets; '
+                                         'facets are searchable indexing '
+                                         'terms in the database.'),
                                data_type='string',
                                default='',
                                min_occurs=0,
                                mode=None),
                   LiteralInput('shards',
                                'Shards to be queried',
+                               abstract='Shards to be queried',
                                data_type='string',
                                default='*',
                                min_occurs=0,
                                mode=None),
                   LiteralInput('offset',
                                'Pagination offset',
+                               abstract=('Where to start in the document '
+                                         'count of the database search.'),
                                data_type='integer',
                                default=0,
                                min_occurs=0,
                                mode=None),
                   LiteralInput('limit',
                                'Pagination limit',
+                               abstract=('Maximum number of documents to '
+                                         'return.'),
                                data_type='integer',
                                default=10,
                                min_occurs=0,
                                mode=None),
                   LiteralInput('fields',
                                'Metadata fields to return',
+                               abstract=('Comme separated list of fields to '
+                                         'return.'),
                                data_type='string',
                                default='*',
                                min_occurs=0,
                                mode=None),
                   LiteralInput('format',
                                'Output Format',
+                               abstract='Output format.',
                                data_type='string',
                                default='application/solr+json',
                                min_occurs=0,
                                mode=None),
                   LiteralInput('query',
                                'Free text search',
+                               abstract='Direct query to the database.',
                                data_type='string',
                                default='*',
                                min_occurs=0,
                                mode=None),
                   LiteralInput('distrib',
                                'Distributed query',
+                               abstract='Distributed query',
                                data_type='boolean',
                                default=False,
                                min_occurs=0,
                                mode=None),
                   LiteralInput('type',
                                'Type of the record',
+                               abstract=('One of Dataset, File, Aggregate or '
+                                         'FileAsAggregate.'),
                                data_type='string',
                                default='Dataset',
                                min_occurs=0,
                                mode=None),
                   LiteralInput('constraints',
                                'Search constraints',
+                               abstract=('Format is '
+                                         'facet1:value1,facet2:value2,...'),
                                data_type='string',
                                default='',
                                min_occurs=0,
@@ -94,10 +111,13 @@ class PavicsSearch(Process):
 
         outputs = [ComplexOutput('search_result',
                                  'PAVICS Catalogue Search Result',
+                                 abstract='PAVICS Catalogue Search Result',
                                  supported_formats=[json_format,
                                                     gmlxml_format]),
                    ComplexOutput('list_result',
                                  'List of OPEnDAP urls of the search result',
+                                 abstract=('List of OPEnDAP urls of the '
+                                           'search result.'),
                                  supported_formats=[json_format])]
         # as_reference now an argument in recent pywps versions?
         outputs[0].as_reference = True
@@ -107,6 +127,7 @@ class PavicsSearch(Process):
             self._handler,
             identifier='pavicsearch',
             title='PAVICS Catalogue Search',
+            abstract='Search the PAVICS database.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,
@@ -143,8 +164,8 @@ class PavicsSearch(Process):
 
         try:
             search_result = catalog.pavicsearch(
-                self.solr_server, facets, limit, offset, search_type, output_format,
-                fields, constraints, query)
+                self.solr_server, facets, limit, offset, search_type,
+                output_format, fields, constraints, query)
         except:
             raise Exception(traceback.format_exc())
 

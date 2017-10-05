@@ -33,18 +33,26 @@ class PavicsUpdate(Process):
         # in the Solr database, they both must be provided.
         inputs = [LiteralInput('id',
                                'id field of the dataset or file',
+                               abstract='id field of the dataset or file.',
                                data_type='string'),
                   LiteralInput('type',
                                'Dataset or File',
+                               abstract=('The File type will update a single '
+                                         'file, the Dataset type will update '
+                                         'all documents sharing its '
+                                         'dataset_id'),
                                data_type='string',
                                default='File',
                                min_occurs=0,
                                mode=None),
                   LiteralInput('updates',
                                'Fields to update with their new values',
+                               abstract=('Format is '
+                                         'key1:value1,key2:value2,...'),
                                data_type='string')]
         outputs = [ComplexOutput('update_result',
                                  'PAVICS Catalogue Update Result',
+                                 abstract='Update result as a json.',
                                  supported_formats=[json_format])]
         outputs[0].as_reference = True
 
@@ -52,6 +60,8 @@ class PavicsUpdate(Process):
             self._handler,
             identifier='pavicsupdate',
             title='PAVICS Catalogue Update',
+            abstract=('Update database entries using key:value pairs and '
+                      'identified by their ids.'),
             version='0.1',
             inputs=inputs,
             outputs=outputs,

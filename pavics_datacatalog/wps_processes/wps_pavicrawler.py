@@ -46,15 +46,19 @@ class PavicsCrawler(Process):
 
         inputs = [LiteralInput('target_files',
                                'Files to crawl',
+                               abstract=('Only those file names will be '
+                                         'crawled.'),
                                data_type='string',
                                min_occurs=0,
                                max_occurs=10000),
                   LiteralInput('target_thredds',
                                'Thredds server to scan',
+                               abstract='Thredds server to scan.',
                                data_type='string',
                                min_occurs=0)]
         outputs = [ComplexOutput('crawler_result',
                                  'PAVICS Crawler Result',
+                                 abstract='Crawler result as a json.',
                                  supported_formats=[json_format],
                                  as_reference=True)]
 
@@ -62,6 +66,7 @@ class PavicsCrawler(Process):
             self._handler,
             identifier='pavicrawler',
             title='PAVICS Crawler',
+            abstract='Crawl thredds server and write to database.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,
