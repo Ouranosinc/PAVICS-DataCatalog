@@ -90,7 +90,7 @@ class GetPoint(Process):
             self._handler,
             identifier='getpoint',
             title='Point value from a NetCDF file',
-            abstract='Obtain a single value from a NetCDF file.',
+            abstract='Return a single value from a NetCDF file at the given grid coordinates.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,
