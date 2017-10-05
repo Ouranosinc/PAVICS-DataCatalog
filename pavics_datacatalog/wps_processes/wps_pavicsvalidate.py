@@ -35,21 +35,29 @@ class PavicsValidate(Process):
         self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
         inputs = [LiteralInput('facets',
                                'Required facets',
+                               abstract=('Facets that are required to be '
+                                         'present in each database entry.'),
                                data_type='string'),
                   LiteralInput('paths',
                                'Search paths',
+                               abstract=('Limit validation to certain paths '
+                                         'relative to thredds main '
+                                         'directory.'),
                                data_type='string',
                                default='',
                                min_occurs=0,
                                mode=None),
                   LiteralInput('files',
                                'Search files',
+                               abstract=('Limit validation according to file '
+                                         'names.'),
                                data_type='string',
                                default='',
                                min_occurs=0,
                                mode=None)]
         outputs = [ComplexOutput('validation_result',
                                  'Validation result',
+                                 abstract='Validation result as a json.',
                                  supported_formats=[json_format])]
         outputs[0].as_reference = True
 
@@ -57,6 +65,7 @@ class PavicsValidate(Process):
             self._handler,
             identifier='pavicsvalidate',
             title='PAVICS Catalogue Validation',
+            abstract='Query database entries for missing required facets.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,

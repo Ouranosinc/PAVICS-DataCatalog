@@ -29,41 +29,51 @@ class GetPoint(Process):
         inputs = [
             LiteralInput('opendap_url',
                          'OPeNDAP url to NetCDF file',
+                         abstract='OPeNDAP url to NetCDF file.',
                          data_type='string',
                          max_occurs=100000),
             LiteralInput('variable',
                          'NetCDF variable name',
+                         abstract='NetCDF variable name.',
                          data_type='string',
                          max_occurs=1000),
             LiteralInput('use_ordered_indices',
-                         'Whether ordered indices are used',
+                         'Use ordered indices',
+                         abstract='Whether ordered indices are used.',
                          data_type='boolean',
                          default=False,
                          min_occurs=0),
             LiteralInput('ordered_index',
-                         'Indices for the point in the NetCDF variable',
+                         'Ordered index',
+                         abstract=('Indices for the point in the NetCDF '
+                                   'variable.'),
                          data_type='integer',
                          default=0,
                          min_occurs=0,
                          max_occurs=10),
             LiteralInput('named_index',
-                         'Indices for the point in the NetCDF variable with '
-                         'named dimensions (dim:index)',
+                         'Named index',
+                         abstract=('Indices for the point in the NetCDF '
+                                   'variable with named dimensions '
+                                   '(dim:index).'),
                          data_type='string',
                          default='',
                          min_occurs=0,
                          max_occurs=10),
             LiteralInput('nearest_to',
-                         'Nearest value for each dimension in the NetCDF '
-                         'variable for the point with named dimensions '
-                         '(dim:value)',
+                         'Nearest to',
+                         abstract=('Nearest value for each dimension in the '
+                                   'NetCDF variable for the point with named '
+                                   'dimensions (dim:value).'),
                          data_type='string',
                          default='',
                          min_occurs=0,
                          max_occurs=10),
             LiteralInput('threshold',
-                         'Thresholds for the distance to each nearest value '
-                         'with named dimensions (dim:threshold)',
+                         'Threshold',
+                         abstract=('Thresholds for the distance to each '
+                                   'nearest value with named dimensions '
+                                   '(dim:threshold).'),
                          data_type='string',
                          default='',
                          min_occurs=0,
@@ -71,6 +81,8 @@ class GetPoint(Process):
 
         outputs = [ComplexOutput('point_result',
                                  'Information for the requested point',
+                                 abstract=('Information for the requested '
+                                           'point.'),
                                  supported_formats=[json_format])]
         outputs[0].as_reference = True
 
@@ -78,7 +90,7 @@ class GetPoint(Process):
             self._handler,
             identifier='getpoint',
             title='Point value from a NetCDF file',
-            abstract='Pending.',
+            abstract='Return a single value from a NetCDF file at the given grid coordinates.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,
