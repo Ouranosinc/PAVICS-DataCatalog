@@ -127,7 +127,7 @@ class PavicsSearch(Process):
             self._handler,
             identifier='pavicsearch',
             title='PAVICS Catalogue Search',
-            abstract='Search the PAVICS database.',
+            abstract='Search the PAVICS database and return a catalogue of matches.',
             version='0.1',
             inputs=inputs,
             outputs=outputs,
