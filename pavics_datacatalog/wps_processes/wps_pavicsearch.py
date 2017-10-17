@@ -27,10 +27,7 @@ gmlxml_format = get_format('GML')
 
 class PavicsSearch(Process):
     def __init__(self):
-        env_solr_host = os.environ.get('SOLR_HOST', None)
-        # base_search_URL in the ESGF Search API is now a solr database URL,
-        # this is provided as the environment variable SOLR_SERVER.
-        self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
+        self.solr_server = os.environ.get('SOLR_HOST', None)
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
                                abstract=('Comma separated list of facets; '
@@ -127,7 +124,8 @@ class PavicsSearch(Process):
             self._handler,
             identifier='pavicsearch',
             title='PAVICS Catalogue Search',
-            abstract='Search the PAVICS database and return a catalogue of matches.',
+            abstract=('Search the PAVICS database and return a catalogue of '
+                      'matches.'),
             version='0.1',
             inputs=inputs,
             outputs=outputs,

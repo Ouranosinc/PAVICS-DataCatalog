@@ -31,18 +31,11 @@ text_format = get_format('TEXT')
 
 class PavicsCrawler(Process):
     def __init__(self):
-        env_solr_host = os.environ.get('SOLR_HOST', None)
+        self.solr_server = os.environ.get('SOLR_HOST', None)
         env_thredds_host = os.environ.get('THREDDS_HOST', '')
         self.wms_alternate_server = os.environ.get(
             'WMS_ALTERNATE_SERVER', None)
-        self.thredds_hosts = map(str.strip, env_thredds_host.split(','))
-        self.thredds_servers = []
-        for thredds_host in self.thredds_hosts:
-            self.thredds_servers.append(
-                'http://{0}/thredds'.format(thredds_host))
-        # base_search_URL in the ESGF Search API is now a solr database URL,
-        # this is provided as the environment variable SOLR_SERVER.
-        self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
+        self.thredds_servers = map(str.strip, env_thredds_host.split(','))
 
         inputs = [LiteralInput('target_files',
                                'Files to crawl',
@@ -66,7 +59,8 @@ class PavicsCrawler(Process):
             self._handler,
             identifier='pavicrawler',
             title='PAVICS Crawler',
-            abstract='Crawl thredds server and write metadata to SOLR database.',
+            abstract=('Crawl thredds server and write metadata to SOLR '
+                      'database.'),
             version='0.1',
             inputs=inputs,
             outputs=outputs,
@@ -89,17 +83,15 @@ class PavicsCrawler(Process):
         # comparison.
         if ('target_thredds' in request.inputs) and \
            (request.inputs['target_thredds'][0].data in self.thredds_servers):
-            target_thredds_servers = ["http://{0}/thredds".format(
-                request.inputs['target_thredds'][0].data)]
+            target_thredds_servers = [request.inputs['target_thredds'][0].data]
         else:
             target_thredds_servers = self.thredds_servers
 
         try:
             for thredds_server in target_thredds_servers:
                 if '<HOST>' in self.wms_alternate_server:
-                    i = self.thredds_servers.index(thredds_server)
                     wms_with_host = self.wms_alternate_server.replace(
-                        '<HOST>', self.thredds_hosts[i].split(':')[0])
+                        '<HOST>', thredds_server.split('/')[2].split(':')[0])
                 else:
                     wms_with_host = self.wms_alternate_server
                 update_result = catalog.pavicrawler(
