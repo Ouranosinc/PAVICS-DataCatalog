@@ -39,7 +39,7 @@ CMD export SOLR_HOST=$(grep --only-matching --perl-regex "(?<=SOLR_HOST\=).*" /h
     printf "\nexport SOLR_HOST=\"$SOLR_HOST\"\n" >> /etc/apache2/envvars && \
     printf "\nexport THREDDS_HOST=\"$THREDDS_HOST\"\n" >> /etc/apache2/envvars && \
     printf "\nexport WMS_ALTERNATE_SERVER=\"$WMS_ALTERNATE_SERVER\"\n" >> /etc/apache2/envvars && \
-    sed -i '/outputurl=/c\outputurl=http://'"$WPS_HOST"'/wps_results/' /etc/pywps.cfg && \
+    sed -i '/outputurl=/c\outputurl='"$WPS_HOST"'/wps_results/' /etc/pywps.cfg && \
     /etc/init.d/apache2 start && tail -f /dev/null
 
 EXPOSE 80

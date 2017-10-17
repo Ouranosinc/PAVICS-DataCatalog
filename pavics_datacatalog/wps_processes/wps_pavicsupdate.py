@@ -25,10 +25,7 @@ gmlxml_format = get_format('GML')
 
 class PavicsUpdate(Process):
     def __init__(self):
-        env_solr_host = os.environ.get('SOLR_HOST', None)
-        # base_search_URL in the ESGF Search API is now a solr database URL,
-        # this is provided as the environment variable SOLR_SERVER.
-        self.solr_server = "http://{0}/solr/birdhouse/".format(env_solr_host)
+        self.solr_server = os.environ.get('SOLR_HOST', None)
         # The combination of the 'source' and 'url' fields provide the 'id'
         # in the Solr database, they both must be provided.
         inputs = [LiteralInput('id',
