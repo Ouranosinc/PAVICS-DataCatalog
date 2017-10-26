@@ -170,26 +170,28 @@ class PavicsSearch(Process):
             raise Exception(traceback.format_exc())
 
         # magpie integration
-        try:
+        if self.magpie_host:
             try:
-                token = request.http_request.cookies['auth_tkt']
-            except KeyError:
-                token = None
-            mag = MagpieService(self.magpie_host, token)
-            for i in range(len(search_result['response']['docs']) - 1, -1, -1):
-                doc = search_result['response']['docs'][i]
-                if hasattr(doc['url'], '__iter__'):
-                    for doc_url in doc['url']:
-                        if not mag.has_view_perm(doc_url):
+                try:
+                    token = request.http_request.cookies['auth_tkt']
+                except KeyError:
+                    token = None
+                mag = MagpieService(self.magpie_host, token)
+                ndocs = len(search_result['response']['docs'])
+                for i in range(ndocs - 1, -1, -1):
+                    doc = search_result['response']['docs'][i]
+                    if hasattr(doc['url'], '__iter__'):
+                        for doc_url in doc['url']:
+                            if not mag.has_view_perm(doc_url):
+                                search_result['response']['docs'].pop(i)
+                                break
+                    else:
+                        if not mag.has_view_perm(doc['url']):
                             search_result['response']['docs'].pop(i)
-                            break
-                else:
-                    if not mag.has_view_perm(doc['url']):
-                        search_result['response']['docs'].pop(i)
-            search_result['response']['numFound'] = \
-                len(search_result['response']['docs'])
-        except:
-            raise Exception(traceback.format_exc())
+                search_result['response']['numFound'] = \
+                    len(search_result['response']['docs'])
+            except:
+                raise Exception(traceback.format_exc())
 
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
