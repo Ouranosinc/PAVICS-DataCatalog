@@ -29,6 +29,7 @@ gmlxml_format = get_format('GML')
 class PavicsSearch(Process):
     def __init__(self):
         self.solr_server = os.environ.get('SOLR_HOST', None)
+        self.magpie_host = os.environ.get('MAGPIE_HOST', None)
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
                                abstract=('Comma separated list of facets; '
@@ -174,7 +175,7 @@ class PavicsSearch(Process):
                 token = request.http_request.cookies['auth_tkt']
             except KeyError:
                 token = None
-            mag = MagpieService('http://pluvier.crim.ca:2001', token)
+            mag = MagpieService(self.magpie_host, token)
             for i in range(len(search_result['response']['docs']) - 1, -1, -1):
                 doc = search_result['response']['docs'][i]
                 if hasattr(doc['url'], '__iter__'):

@@ -1,3 +1,4 @@
+import os
 import requests
 import json
 
@@ -17,9 +18,9 @@ class MagpieService:
         self.allowed_urls = []
         for key, service in services['services']['thredds'].items():
             thredds_svc = service['service_name']
-            magpie_path = '/users/current/services/{svc}/resources'.format(
+            magpie_path = 'users/current/services/{svc}/resources'.format(
                 token=token, svc=thredds_svc)
-            response = session.get(magpie_url + magpie_path)
+            response = session.get(os.path.join(magpie_url,magpie_path))
             if response.status_code != 200:
                 raise response.raise_for_status()
 
