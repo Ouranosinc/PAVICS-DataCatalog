@@ -31,15 +31,9 @@ COPY pywps.wsgi /var/www/html/wps/
 COPY apache2.conf /etc/apache2/
 COPY pywps.cfg /etc/
 COPY catalog.cfg /home/
+COPY docker_configs.py /home/
 
-CMD export SOLR_HOST=$(grep --only-matching --perl-regex "(?<=SOLR_HOST\=).*" /home/catalog.cfg) && \
-    export THREDDS_HOST=$(grep --only-matching --perl-regex "(?<=THREDDS_HOST\=).*" /home/catalog.cfg) && \
-    export WPS_RESULTS=$(grep --only-matching --perl-regex "(?<=WPS_RESULTS\=).*" /home/catalog.cfg) && \
-    export WMS_ALTERNATE_SERVER=$(grep --only-matching --perl-regex "(?<=WMS_ALTERNATE_SERVER\=).*" /home/catalog.cfg) && \
-    printf "\nexport SOLR_HOST=\"$SOLR_HOST\"\n" >> /etc/apache2/envvars && \
-    printf "\nexport THREDDS_HOST=\"$THREDDS_HOST\"\n" >> /etc/apache2/envvars && \
-    printf "\nexport WMS_ALTERNATE_SERVER=\"$WMS_ALTERNATE_SERVER\"\n" >> /etc/apache2/envvars && \
-    sed -i '/outputurl=/c\outputurl='"$WPS_RESULTS" /etc/pywps.cfg && \
+CMD python /home/docker_configs.py && \
     /etc/init.d/apache2 start && tail -f /dev/null
 
 EXPOSE 80

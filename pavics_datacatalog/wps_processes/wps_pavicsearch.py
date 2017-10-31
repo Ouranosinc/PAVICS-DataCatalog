@@ -6,6 +6,7 @@ from pywps import Process, get_format, configuration
 from pywps import LiteralInput, ComplexOutput
 
 from pavics import catalog
+from pavics_datacatalog.magpie_utils import MagpieService
 
 # Example usage:
 #
@@ -28,6 +29,7 @@ gmlxml_format = get_format('GML')
 class PavicsSearch(Process):
     def __init__(self):
         self.solr_server = os.environ.get('SOLR_HOST', None)
+        self.magpie_host = os.environ.get('MAGPIE_HOST', None)
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
                                abstract=('Comma separated list of facets; '
@@ -166,6 +168,30 @@ class PavicsSearch(Process):
                 output_format, fields, constraints, query)
         except:
             raise Exception(traceback.format_exc())
+
+        # magpie integration
+        if self.magpie_host:
+            try:
+                try:
+                    token = request.http_request.cookies['auth_tkt']
+                except KeyError:
+                    token = None
+                mag = MagpieService(self.magpie_host, token)
+                ndocs = len(search_result['response']['docs'])
+                for i in range(ndocs - 1, -1, -1):
+                    doc = search_result['response']['docs'][i]
+                    if hasattr(doc['url'], '__iter__'):
+                        for doc_url in doc['url']:
+                            if not mag.has_view_perm(doc_url):
+                                search_result['response']['docs'].pop(i)
+                                break
+                    else:
+                        if not mag.has_view_perm(doc['url']):
+                            search_result['response']['docs'].pop(i)
+                search_result['response']['numFound'] = \
+                    len(search_result['response']['docs'])
+            except:
+                raise Exception(traceback.format_exc())
 
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
