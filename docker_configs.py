@@ -3,7 +3,8 @@ import ConfigParser
 config = ConfigParser.RawConfigParser()
 config.read('/home/catalog.cfg')
 catalog_configs = ['SOLR_HOST', 'THREDDS_HOST', 'MAGPIE_HOST',
-                   'WMS_ALTERNATE_SERVER', 'WPS_RESULTS']
+                   'WMS_ALTERNATE_SERVER', 'WPS_RESULTS',
+                   'THREDDS_HOST_MAGPIE_SVC_NAME']
 config_values = {}
 for catalog_config in catalog_configs:
     try:

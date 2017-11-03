@@ -4,7 +4,7 @@ import json
 
 
 class MagpieService:
-    def __init__(self, magpie_url, token):
+    def __init__(self, magpie_url, magpie_thredds_services, token):
         permission = 'read'
         magpie_url = magpie_url.strip('/')
         session = requests.Session()
@@ -18,22 +18,26 @@ class MagpieService:
         self.allowed_urls = []
         for key, service in services['services']['thredds'].items():
             thredds_svc = service['service_name']
+            if thredds_svc not in magpie_thredds_services:
+                continue
+
             magpie_path = 'users/current/services/{svc}/resources'.format(
                 token=token, svc=thredds_svc)
-            response = session.get(os.path.join(magpie_url,magpie_path))
+            response = session.get(os.path.join(magpie_url, magpie_path))
             if response.status_code != 200:
                 raise response.raise_for_status()
 
             response_data = json.loads(response.text)
             service = response_data['service']
 
+            thredds_host = magpie_thredds_services[thredds_svc].strip('/')
             if permission in service['permission_names']:
-                self.allowed_urls.append(service['service_url'].strip('/'))
+                self.allowed_urls.append(thredds_host)
             else:
                 for c_id, resource_tree in service['resources'].items():
                     for resource_path in self.tree_parser(
                             resource_tree, permission,
-                            '/'.join([service['service_url'], 'fileServer'])):
+                            '/'.join([thredds_host, 'fileServer'])):
                         self.allowed_urls.append(resource_path.strip('/'))
 
     def tree_parser(self, resources_tree, permission, url):
