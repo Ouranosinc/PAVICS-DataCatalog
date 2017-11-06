@@ -1,4 +1,17 @@
+import os
+import pwd
 import ConfigParser
+
+
+def make_dirs(name, user):
+    mode = 0o755
+    uid, gid = pwd.getpwnam(user)[2:4]
+    if not os.path.isdir(name):
+        os.makedirs(name, mode)
+    else:
+        os.chmod(name, mode)
+    os.chown(name, uid, gid)
+
 
 config = ConfigParser.RawConfigParser()
 config.read('/home/catalog.cfg')
@@ -28,3 +41,8 @@ pywps_config = pywps_config.replace(
 
 with open('/etc/pywps.cfg', 'w') as f:
     f.write(pywps_config)
+
+config = ConfigParser.RawConfigParser()
+config.read('/etc/pywps.cfg')
+outputpath = config.get('server', 'outputpath')
+make_dirs(outputpath, 'apapywps')
