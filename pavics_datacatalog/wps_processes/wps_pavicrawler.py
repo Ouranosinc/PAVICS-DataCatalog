@@ -89,7 +89,8 @@ class PavicsCrawler(Process):
 
         try:
             for thredds_server in target_thredds_servers:
-                if '<HOST>' in self.wms_alternate_server:
+                if (self.wms_alternate_server is not None) and \
+                   ('<HOST>' in self.wms_alternate_server):
                     wms_with_host = self.wms_alternate_server.replace(
                         '<HOST>', thredds_server.split('/')[2].split(':')[0])
                 else:
