@@ -30,6 +30,9 @@ class PavicsSearch(Process):
     def __init__(self):
         self.solr_server = os.environ.get('SOLR_HOST', None)
         self.magpie_host = os.environ.get('MAGPIE_HOST', None)
+        self.magpie_thredds_servers = {svc_name: host for svc_name, host in
+                                       zip(map(str.strip, os.environ.get('THREDDS_HOST_MAGPIE_SVC_NAME', '').split(',')),
+                                           map(str.strip, os.environ.get('THREDDS_HOST', '').split(',')))}
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
                                abstract=('Comma separated list of facets; '
@@ -176,7 +179,7 @@ class PavicsSearch(Process):
                     token = request.http_request.cookies['auth_tkt']
                 except KeyError:
                     token = None
-                mag = MagpieService(self.magpie_host, token)
+                mag = MagpieService(self.magpie_host, self.magpie_thredds_servers, token)
                 ndocs = len(search_result['response']['docs'])
                 for i in range(ndocs - 1, -1, -1):
                     doc = search_result['response']['docs'][i]
