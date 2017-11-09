@@ -8,7 +8,7 @@ RUN apt-get -yqq update && \
                          python-future python-requests git-core && \
     pip install threddsclient && \
     pip install https://github.com/bstdenis/pywps/archive/fix_async.zip && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/master.zip
+    pip install https://github.com/Ouranosinc/pyPavics/archive/0.1.0.zip
 
 COPY . /root/
 COPY configtests.cfg /root/pavics_datacatalog/tests/
