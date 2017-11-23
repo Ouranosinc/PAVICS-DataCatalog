@@ -13,36 +13,30 @@ def make_dirs(name, user):
     os.chown(name, uid, gid)
 
 
-config = ConfigParser.RawConfigParser()
-config.read('/home/catalog.cfg')
-catalog_configs = ['SOLR_HOST', 'THREDDS_HOST', 'MAGPIE_HOST',
-                   'WMS_ALTERNATE_SERVER', 'WPS_RESULTS',
-                   'THREDDS_HOST_MAGPIE_SVC_NAME']
-config_values = {}
-for catalog_config in catalog_configs:
-    try:
-        config_values[catalog_config] = config.get('catalog', catalog_config)
-    except ConfigParser.NoOptionError:
-        config_values[catalog_config] = None
+catalog_config_fn = '/home/catalog.cfg'
+pywps_config_fn = '/etc/pywps.cfg'
+apache_envvars_fn = '/etc/apache2/envvars'
 
-with open('/etc/apache2/envvars', 'a') as f:
+
+# Export apache environment variables from the catalog config
+config = ConfigParser.RawConfigParser()
+config.read(catalog_config_fn)
+with open(apache_envvars_fn, 'a') as f:
     f.write('\n')
-    for key, val in config_values.items():
-        if (val is None) or (key == 'WPS_RESULTS'):
-            continue
-        f.write('export {0}="{1}"\n'.format(key, val))
+    for cfg, val in config.items('catalog'):
+        f.write('export {0}="{1}"\n'.format(cfg.upper(), val))
 
-with open('/etc/pywps.cfg', 'r') as f:
-    pywps_config = f.read()
+# Update pywps config using the catalog pywps section
+pywps_config = ConfigParser.RawConfigParser()
+pywps_config.read(pywps_config_fn)
+for cfg, val in config.items('pywps'):
+    try:
+        pywps_config.set('server', cfg, val)
+    except ConfigParser.NoSectionError:
+        pass
+with open(pywps_config_fn, 'w') as f:
+    pywps_config.write(f)
 
-pywps_config = pywps_config.replace(
-    'outputurl=placeholder_for_docker_run',
-    'outputurl={0}'.format(config_values['WPS_RESULTS']))
-
-with open('/etc/pywps.cfg', 'w') as f:
-    f.write(pywps_config)
-
-config = ConfigParser.RawConfigParser()
-config.read('/etc/pywps.cfg')
-outputpath = config.get('server', 'outputpath')
+# Make sure the output path exists
+outputpath = pywps_config.get('server', 'outputpath')
 make_dirs(outputpath, 'apapywps')
