@@ -62,7 +62,7 @@ class PavicsSearch(Process):
                                abstract=('Maximum number of documents to '
                                          'return.'),
                                data_type='integer',
-                               default=10,
+                               default=0,
                                min_occurs=0,
                                mode=None),
                   LiteralInput('fields',

@@ -26,6 +26,12 @@ hardcoded in other places.
 
 Development:
 
+A local solr database can be used:
+
+    docker run --name my_solr -d -p 8983:8983 -t pavics/solr
+
+Solr will be located at http://localhost:8983/ (default in catalog.cfg)
+
 New processes must be added to the pavics_datacatalog/wps_processes/__init__.py
 file.
 
