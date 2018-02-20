@@ -8,10 +8,11 @@ RUN apt-get -yqq update && \
                          python-mpltoolkits.basemap python-pip apache2 \
                          libapache2-mod-wsgi python-setuptools python-lxml \
                          python-future python-requests git-core postgresql \
-                         python-psycopg2 && \
-    pip install threddsclient && \
+                         python-psycopg2
+
+RUN pip install threddsclient && \
     pip install https://github.com/bstdenis/pywps/archive/7cab3866e34ce24d3df56e3c1c546739b1cda2d7.zip && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/0.1.0.zip
+    pip install https://github.com/Ouranosinc/pyPavics/archive/0.2.1.zip
 
 COPY . /root/
 COPY configtests.cfg /root/pavics_datacatalog/tests/
