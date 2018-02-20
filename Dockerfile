@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
-# The pywps master has not been tagged recently, this is the master from
-# 2017-06-04
+# The pywps master has not been tagged recently, this is the develop from
+# 2018-01-17
 RUN apt-get -yqq update && \
     apt-get -yqq install python python-nose python-zmq ipython python-numpy \
                          python-scipy python-netcdf4 python-matplotlib \
@@ -11,7 +11,7 @@ RUN apt-get -yqq update && \
                          python-psycopg2
 
 RUN pip install threddsclient && \
-    pip install https://github.com/bstdenis/pywps/archive/7cab3866e34ce24d3df56e3c1c546739b1cda2d7.zip && \
+    pip install https://github.com/bstdenis/pywps/archive/8854a4664fdc2162ffcf8bc9e4d149271484a495.zip && \
     pip install https://github.com/Ouranosinc/pyPavics/archive/0.2.1.zip
 
 COPY . /root/
