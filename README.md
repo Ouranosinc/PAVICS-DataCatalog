@@ -1,36 +1,41 @@
 # PAVICS-DataCatalog
-DataCatalog server for the PAVICS project
+DataCatalog Web Processing Service for the PAVICS project
 
-Installation:
+Installation (requires docker - https://www.docker.com):
 
-As a docker container running the wps:
-
-    docker build -t pavics-datacatalog .
+    docker pull pavics/pavics-datacatalog
 
 Configuration:
 
-Provide the SOLR and THREDDS host, as well as the exposed WPS host on which
-output files will be available in the catalog.cfg file.
+Provide the Solr and THREDDS host (if localhost, use the ip address since
+this is inside a docker container), as well as the exposed WPS host on which
+output files will be available, in the catalog.cfg file.
 
 Running the application:
 
-    docker run --name pavics-datacatalog1 -d -p 8009:80 pavics-datacatalog
+    docker run --name pavics-datacatalog1 -d -v /path/to/local/catalog.cfg:/home/catalog.cfg -p 8009:80 pavics-datacatalog
 
 The available processes can be obtained at:
 
     http://localhost:8009/pywps?service=WPS&request=GetCapabilities&version=1.0.0
 
+Development:
+
+Building the docker image:
+
+As a docker container running the wps:
+
+    docker build -t pavics-datacatalog .
+
 The pywps config file (pywps.cfg) is available. However, the outputurl
 and outputpath values should not be modified as they are currently
-hardcoded in other places.
-
-Development:
+dynamically set in other places.
 
 A local solr database can be used:
 
     docker run --name my_solr -d -p 8983:8983 -t pavics/solr
 
-Solr will be located at http://localhost:8983/ (default in catalog.cfg)
+Solr will be located at http://localhost:8983/solr
 
 New processes must be added to the pavics_datacatalog/wps_processes/__init__.py
 file.
