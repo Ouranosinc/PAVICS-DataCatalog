@@ -5,6 +5,7 @@ from .wps_pavicsearch import PavicsSearch
 from .wps_pavicsupdate import PavicsUpdate
 from .wps_pavicsvalidate import PavicsValidate
 from .wps_period2indices import Period2Indices
+from .wps_test_docs import PavicsTestDocs
 
 processes = [
     GetPoint(),
@@ -13,4 +14,6 @@ processes = [
     PavicsSearch(),
     PavicsUpdate(),
     PavicsValidate(),
-    Period2Indices()]
+    Period2Indices(),
+    PavicsTestDocs(),
+]

@@ -20,6 +20,9 @@ my_facets = ['experiment', 'frequency', 'institute', 'model', 'project']
 # variable, variable_long_name and cf_standard_name, are not necessarily
 # in the global attributes, need to come back for this later...
 
+# This list of ignored thredds directories could also be a config...
+my_thredds_ignore = ['birdhouse/wps_outputs', 'birdhouse/workspaces']
+
 # The user under which apache is running must be able to write to that
 # directory.
 output_path = configuration.get_config_value('server', 'outputpath')
@@ -38,9 +41,15 @@ class PavicsCrawler(Process):
         self.thredds_servers = map(str.strip, env_thredds_host.split(','))
 
         inputs = [LiteralInput('target_files',
-                               'Files to crawl',
-                               abstract=('Only those file names will be '
+                               'Paths to crawl',
+                               abstract=('Only those paths names will be '
                                          'crawled.'),
+                               data_type='string',
+                               min_occurs=0,
+                               max_occurs=10000),
+                  LiteralInput('ignored_files',
+                               'Paths to ignore during crawling',
+                               abstract=('Those paths will be ignored.'),
                                data_type='string',
                                min_occurs=0,
                                max_occurs=10000),
@@ -69,11 +78,13 @@ class PavicsCrawler(Process):
 
     def _handler(self, request, response):
         if 'target_files' in request.inputs:
-            target_files = []
-            for i in range(len(request.inputs['target_files'])):
-                target_files.append(request.inputs['target_files'][i].data)
+            target_files = [x.data for x in request.inputs['target_files']]
         else:
             target_files = None
+        if 'ignored_files' in request.inputs:
+            ignored_files = [x.data for x in request.inputs['ignored_files']]
+        else:
+            ignored_files = my_thredds_ignore
 
         # If a target thredds server is specified, it must be in the list
         # of thredds servers from the config, otherwise we fall back to
@@ -98,7 +109,7 @@ class PavicsCrawler(Process):
                 update_result = catalog.pavicrawler(
                     thredds_server, self.solr_server, my_facets,
                     set_dataset_id=True, wms_alternate_server=wms_with_host,
-                    target_files=target_files)
+                    target_files=target_files, ignored_files=ignored_files)
         except:
             raise Exception(traceback.format_exc())
 
