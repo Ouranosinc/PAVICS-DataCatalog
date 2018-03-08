@@ -12,7 +12,7 @@ RUN apt-get -yqq update && \
 
 RUN pip install threddsclient && \
     pip install https://github.com/bstdenis/pywps/archive/8854a4664fdc2162ffcf8bc9e4d149271484a495.zip && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/crawl_with_auth.zip
+    pip install https://github.com/Ouranosinc/pyPavics/archive/0.3.0.zip
 
 COPY . /root/
 COPY configtests.cfg /root/pavics_datacatalog/tests/

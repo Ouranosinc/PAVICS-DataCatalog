@@ -42,9 +42,11 @@ class PavicsCrawler(Process):
             'WMS_ALTERNATE_SERVER', None)
         self.thredds_servers = map(str.strip, env_thredds_host.split(','))
         self.magpie_host = os.environ.get('MAGPIE_HOST', None)
-        self.magpie_credentials = dict(provider_name='ziggurat',
-                                       user_name=os.environ.get('MAGPIE_USER', ''),
-                                       password=os.environ.get('MAGPIE_PW', ''))
+        self.magpie_credentials = dict(
+            provider_name='ziggurat',
+            user_name=os.environ.get('MAGPIE_USER', ''),
+            password=os.environ.get('MAGPIE_PW', ''))
+        self.verify = os.environ.get('VERIFY', True) not in ['false', 'False']
         inputs = [LiteralInput('target_files',
                                'Paths to crawl',
                                abstract=('Only those paths names will be '
@@ -106,8 +108,10 @@ class PavicsCrawler(Process):
         try:
             if self.magpie_host:
                 s = requests.Session()
-                response = s.post('{0}/signin'.format(self.magpie_host), data=self.magpie_credentials)
-                auth_tkt = response.cookies.get('auth_tkt', domain=urlparse(self.magpie_host).netloc)
+                response = s.post('{0}/signin'.format(self.magpie_host),
+                                  data=self.magpie_credentials)
+                auth_tkt = response.cookies.get(
+                    'auth_tkt', domain=urlparse(self.magpie_host).netloc)
                 headers = dict(Cookie='auth_tkt={0}'.format(auth_tkt))
             else:
                 headers = None
@@ -123,7 +127,7 @@ class PavicsCrawler(Process):
                     thredds_server, self.solr_server, my_facets,
                     set_dataset_id=True, wms_alternate_server=wms_with_host,
                     target_files=target_files, ignored_files=ignored_files,
-                    headers = headers)
+                    headers=headers, verify=self.verify)
         except:
             raise Exception(traceback.format_exc())
 
