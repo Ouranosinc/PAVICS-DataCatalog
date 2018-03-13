@@ -84,6 +84,7 @@ class PavicsCrawler(Process):
             status_supported=True)
 
     def _handler(self, request, response):
+        response.update_status('Reading inputs', 1)
         if 'target_files' in request.inputs:
             target_files = [x.data for x in request.inputs['target_files']]
         else:
@@ -105,17 +106,21 @@ class PavicsCrawler(Process):
         else:
             target_thredds_servers = self.thredds_servers
 
+        response.update_status('Starting pavicrawler operation', 5)
         try:
             if self.magpie_host:
+                response.update_status('Getting magpie authentication', 6)
                 s = requests.Session()
-                response = s.post('{0}/signin'.format(self.magpie_host),
-                                  data=self.magpie_credentials)
-                auth_tkt = response.cookies.get(
+                req_response = s.post('{0}/signin'.format(self.magpie_host),
+                                      data=self.magpie_credentials,
+                                      verify=self.verify)
+                auth_tkt = req_response.cookies.get(
                     'auth_tkt', domain=urlparse(self.magpie_host).netloc)
                 headers = dict(Cookie='auth_tkt={0}'.format(auth_tkt))
             else:
                 headers = None
 
+            response.update_status('Calling pavicrawler', 10)
             for thredds_server in target_thredds_servers:
                 if (self.wms_alternate_server is not None) and \
                    ('<HOST>' in self.wms_alternate_server):
@@ -131,6 +136,7 @@ class PavicsCrawler(Process):
         except:
             raise Exception(traceback.format_exc())
 
+        response.update_status('Setting outputs', 95)
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         output_file_name = "solr_result_{0}_.json".format(time_str)
