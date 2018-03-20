@@ -46,3 +46,16 @@ if the dependencies are all installed locally as well. Otherwise, install
 as a package and run:
 
     python setup.py test
+
+Some relevant log files:
+
+    docker exec -it pavics-datacatalog1 /bin/bash
+    cat /var/log/apache2/access.log
+    cat /var/log/apache2/error.log
+    cat /var/log/postgresql/postgresql-9.5-main.log
+
+Sample WPS calls:
+
+Crawler:
+
+    http://localhost:8009/pywps?service=WPS&request=execute&version=1.0.0&identifier=pavicrawler&storeExecuteResponse=true&status=true&DataInputs=
