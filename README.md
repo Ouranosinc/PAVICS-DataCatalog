@@ -13,7 +13,7 @@ output files will be available, in the catalog.cfg file.
 
 Running the application:
 
-    docker run --name pavics-datacatalog1 -d -v /path/to/local/catalog.cfg:/home/catalog.cfg -p 8009:80 pavics-datacatalog
+    docker run --name pavics-datacatalog1 -d -v /path/to/local/catalog.cfg:/home/catalog.cfg -p 8009:80 pavics/pavics-datacatalog
 
 The available processes can be obtained at:
 
@@ -30,6 +30,10 @@ As a docker container running the wps:
 The pywps config file (pywps.cfg) is available. However, the outputurl
 and outputpath values should not be modified as they are currently
 dynamically set in other places.
+
+Configure as above and run the local build:
+
+    docker run --name pavics-datacatalog1 -d -v /path/to/local/catalog.cfg:/home/catalog.cfg -p 8009:80 pavics-datacatalog
 
 A local solr database can be used:
 
@@ -55,6 +59,10 @@ Some relevant log files:
     cat /var/log/postgresql/postgresql-9.5-main.log
 
 Sample WPS calls:
+
+Add test docs to Solr index:
+
+    http://localhost:8009/pywps?service=WPS&request=execute&version=1.0.0&identifier=pavicstestdocs&DataInputs=
 
 Crawler:
 
