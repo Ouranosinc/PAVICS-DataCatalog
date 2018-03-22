@@ -30,9 +30,12 @@ class PavicsSearch(Process):
     def __init__(self):
         self.solr_server = os.environ.get('SOLR_HOST', None)
         self.magpie_host = os.environ.get('MAGPIE_HOST', None)
-        self.magpie_thredds_servers = {svc_name: host for svc_name, host in
-                                       zip(map(str.strip, os.environ.get('THREDDS_HOST_MAGPIE_SVC_NAME', '').split(',')),
-                                           map(str.strip, os.environ.get('THREDDS_HOST', '').split(',')))}
+        svc_name = os.environ.get('THREDDS_HOST_MAGPIE_SVC_NAME', '')
+        self.magpie_thredds_servers = {
+            svc_name: host for svc_name, host in
+            zip(map(str.strip, svc_name.split(',')),
+                map(str.strip, os.environ.get('THREDDS_HOST', '').split(',')))}
+        self.esgf_nodes = os.environ.get('ESGF_NODES','').split(',')
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
                                abstract=('Comma separated list of facets; '
@@ -109,6 +112,13 @@ class PavicsSearch(Process):
                                data_type='string',
                                default='',
                                min_occurs=0,
+                               mode=None),
+                  LiteralInput('esgf',
+                               'Include ESGF search',
+                               abstract='Whether to also search ESGF nodes.',
+                               data_type='boolean',
+                               default=False,
+                               min_occurs=0,
                                mode=None)]
 
         outputs = [ComplexOutput('search_result',
@@ -164,13 +174,29 @@ class PavicsSearch(Process):
             query = request.inputs['query'][0].data
         else:
             query = None
+        if 'esgf' in request.inputs:
+            search_esgf = request.inputs['esgf'][0].data
+        else:
+            search_esgf = False
 
-        try:
-            search_result = catalog.pavicsearch(
-                self.solr_server, facets, limit, offset, search_type,
-                output_format, fields, constraints, query)
-        except:
-            raise Exception(traceback.format_exc())
+        if search_esgf:
+            try:
+                (search_result, search_url) = catalog.pavics_and_esgf_search(
+                    [self.solr_server], self.esgf_nodes, facets=facets,
+                    offset=offset, limit=limit, fields=fields, query=query,
+                    constraints=constraints, search_type=search_type,
+                    output_format=output_format)
+            except:
+                raise Exception(traceback.format_exc())
+        else:
+            try:
+                (search_result, search_url) = catalog.pavicsearch(
+                    self.solr_server, facets=facets, offset=offset,
+                    limit=limit, fields=fields, query=query,
+                    constraints=constraints, search_type=search_type,
+                    output_format=output_format)
+            except:
+                raise Exception(traceback.format_exc())
 
         # magpie integration
         if self.magpie_host:
@@ -179,10 +205,14 @@ class PavicsSearch(Process):
                     token = request.http_request.cookies['auth_tkt']
                 except KeyError:
                     token = None
-                mag = MagpieService(self.magpie_host, self.magpie_thredds_servers, token)
+                mag = MagpieService(
+                    self.magpie_host, self.magpie_thredds_servers, token)
                 ndocs = len(search_result['response']['docs'])
                 for i in range(ndocs - 1, -1, -1):
                     doc = search_result['response']['docs'][i]
+                    # Skip if ESGF result
+                    if doc['source'] == 'ESGF':
+                        continue
                     if hasattr(doc['url'], '__iter__'):
                         for doc_url in doc['url']:
                             if not mag.has_view_perm(doc_url):
