@@ -35,7 +35,7 @@ class PavicsSearch(Process):
             svc_name: host for svc_name, host in
             zip(map(str.strip, svc_name.split(',')),
                 map(str.strip, os.environ.get('THREDDS_HOST', '').split(',')))}
-        self.esgf_nodes = os.environ.get('ESGF_NODES','').split(',')
+        self.esgf_nodes = os.environ.get('ESGF_NODES', '').split(',')
         inputs = [LiteralInput('facets',
                                'Facet values and counts',
                                abstract=('Comma separated list of facets; '
@@ -119,6 +119,14 @@ class PavicsSearch(Process):
                                data_type='boolean',
                                default=False,
                                min_occurs=0,
+                               mode=None),
+                  LiteralInput('list_type',
+                               'The type of file links in the result list',
+                               abstract=('Can be opendap_url, fileserver_url, '
+                                         'gridftp_url, globus_url, wms_url'),
+                               data_type='string',
+                               default='opendap_url',
+                               min_occurs=0,
                                mode=None)]
 
         outputs = [ComplexOutput('search_result',
@@ -178,6 +186,10 @@ class PavicsSearch(Process):
             search_esgf = request.inputs['esgf'][0].data
         else:
             search_esgf = False
+        if 'list_type' in request.inputs:
+            list_type = request.inputs['list_type'][0].data
+        else:
+            list_type = 'opendap_url'
 
         if search_esgf:
             try:
@@ -248,7 +260,8 @@ class PavicsSearch(Process):
             f1.write("[]")
         else:
             f1.write(json.dumps(
-                catalog.list_of_files_from_pavicsearch(search_result)))
+                catalog.list_of_files_from_pavicsearch(search_result,
+                                                       list_type)))
         f1.close()
 
         response.outputs['search_result'].file = output_file
