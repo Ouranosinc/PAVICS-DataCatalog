@@ -100,9 +100,14 @@ class PavicsCrawler(Process):
         # Suggestion: decompose the target_thredds and compare individual
         # sections of the url/port to allow more flexibility in the
         # comparison.
-        if ('target_thredds' in request.inputs) and \
-           (request.inputs['target_thredds'][0].data in self.thredds_servers):
-            target_thredds_servers = [request.inputs['target_thredds'][0].data]
+        if 'target_thredds' in request.inputs:
+            check_target = request.inputs['target_thredds'][0].data
+            for valid_thredds in self.thredds_servers:
+                if valid_thredds == check_target[:len(valid_thredds)]:
+                    target_thredds_servers = [check_target]
+                    break
+            else:
+                target_thredds_servers = self.thredds_servers
         else:
             target_thredds_servers = self.thredds_servers
 

@@ -135,9 +135,8 @@ class PavicsSearch(Process):
                                  supported_formats=[json_format,
                                                     gmlxml_format]),
                    ComplexOutput('list_result',
-                                 'List of OPEnDAP urls of the search result',
-                                 abstract=('List of OPEnDAP urls of the '
-                                           'search result.'),
+                                 'List of urls of the search result',
+                                 abstract='List of urls of the search result.',
                                  supported_formats=[json_format])]
         # as_reference now an argument in recent pywps versions?
         outputs[0].as_reference = True
@@ -193,7 +192,7 @@ class PavicsSearch(Process):
 
         if search_esgf:
             try:
-                (search_result, search_url) = catalog.pavics_and_esgf_search(
+                search_result = catalog.pavics_and_esgf_search(
                     [self.solr_server], self.esgf_nodes, facets=facets,
                     offset=offset, limit=limit, fields=fields, query=query,
                     constraints=constraints, search_type=search_type,
