@@ -67,3 +67,16 @@ Add test docs to Solr index:
 Crawler:
 
     http://localhost:8009/pywps?service=WPS&request=execute&version=1.0.0&identifier=pavicrawler&storeExecuteResponse=true&status=true&DataInputs=
+
+Troubleshooting:
+
+If some servers are not seen from within the docker container (e.g. getting
+timeout errors), it might be necessary to use a resolv.conf with:
+
+    search domain.com
+    nameserver xxx.xxx.xxx.xxx
+    nameserver xxx.xxx.xxx.xxx
+
+Where the ips are from the nslookup of the domain:
+
+    docker run --name pavics-datacatalog1 -d -v /path/to/local/catalog.cfg:/home/catalog.cfg -v /path/to/resolv.conf:/etc/resolv.conf -p 8009:80 pavics-datacatalog
