@@ -26,7 +26,7 @@ def my_test_suite():
     return test_suite
 
 setup(name='pavics_datacatalog',
-      version='0.6.1',
+      version='0.6.2',
       description='Processes for data catalog interactions',
       long_description=README + '\n\n' + CHANGES,
       classifiers=classifiers,
