@@ -190,7 +190,7 @@ class PavicsSearch(Process):
                 raise Exception(traceback.format_exc())
         else:
             try:
-                search_result = catalog.pavicsearch(
+                (search_result, search_url) = catalog.pavicsearch(
                     self.solr_server, facets=facets, offset=offset,
                     limit=limit, fields=fields, query=query,
                     constraints=constraints, search_type=search_type,
