@@ -12,7 +12,7 @@ RUN apt-get -yqq update && \
 
 RUN pip install threddsclient && \
     pip install https://github.com/geopython/pywps/archive/48d0e6b5bc5c3f31b3d5eb56341d4a66558ccd51.zip && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/0.4.2.zip
+    pip install https://github.com/Ouranosinc/pyPavics/archive/0.4.3.zip
 
 COPY . /root/
 COPY configtests.cfg /root/pavics_datacatalog/tests/
