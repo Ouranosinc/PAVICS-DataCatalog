@@ -1,3 +1,4 @@
 *.pyc
 *.egg-info/
 pavics_datacatalog/tests/configtests.cfg
+.idea/

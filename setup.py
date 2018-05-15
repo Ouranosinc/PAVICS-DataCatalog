@@ -8,7 +8,10 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.md')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.md')).read()
 
-reqs = ['pywps', 'pavics']
+REQUIREMENTS = set([])  # use set to have unique packages by name
+with open('requirements.txt', 'r') as requirements_file:
+    [REQUIREMENTS.add(line.strip()) for line in requirements_file]
+REQUIREMENTS = list(REQUIREMENTS)
 
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -19,11 +22,13 @@ classifiers = [
     'Programming Language :: Python',
     'Topic :: Scientific/Engineering :: Atmospheric Science']
 
+
 def my_test_suite():
     test_loader = unittest.TestLoader()
     test_suite = test_loader.discover('pavics_datacatalog/tests',
                                       pattern='test_*.py')
     return test_suite
+
 
 setup(name='pavics_datacatalog',
       version='0.6.5',
@@ -41,6 +46,6 @@ setup(name='pavics_datacatalog',
       include_package_data=True,
       zip_safe=False,
       test_suite='setup.my_test_suite',
-      install_requires=reqs,
+      install_requires=REQUIREMENTS,
       entry_points={'console_scripts': []},
       )
