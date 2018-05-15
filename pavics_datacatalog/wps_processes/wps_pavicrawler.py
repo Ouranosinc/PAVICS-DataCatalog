@@ -3,9 +3,13 @@ import time
 import traceback
 import json
 import requests
-from urlparse import urlparse
 from pywps import Process, get_format, configuration
 from pywps import LiteralInput, ComplexOutput
+
+# make urllib parse module Python 2/3 compatible
+from future.standard_library import install_aliases
+install_aliases()
+from urllib.parse import urlparse
 
 from pavics import catalog
 
