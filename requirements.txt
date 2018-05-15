@@ -1,4 +1,6 @@
 setuptools
 pywps
 requests
+urlparse
+threddsclient
 pavics
