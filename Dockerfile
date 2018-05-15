@@ -8,7 +8,7 @@ RUN apt-get -yqq update && \
                          python-mpltoolkits.basemap python-pip \
                          python-flufl.enum apache2 \
                          libapache2-mod-wsgi python-setuptools python-lxml \
-                         python-future python-requests git-core
+                         python-future python-requests python-psycopg2 git-core
 
 RUN pip install threddsclient && \
     pip install https://github.com/geopython/pywps/archive/48d0e6b5bc5c3f31b3d5eb56341d4a66558ccd51.zip && \

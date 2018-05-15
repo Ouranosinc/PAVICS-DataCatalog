@@ -34,6 +34,11 @@ for cfg, val in config.items('pywps'):
         pywps_config.set('server', cfg, val)
     except ConfigParser.NoSectionError:
         pass
+for cfg, val in config.items('logging'):
+    try:
+        pywps_config.set('logging', cfg, val)
+    except ConfigParser.NoSectionError:
+        pass
 with open(pywps_config_fn, 'w') as f:
     pywps_config.write(f)
 
