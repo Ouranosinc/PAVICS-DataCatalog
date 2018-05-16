@@ -11,7 +11,7 @@ RUN apt-get -yqq update && \
                          python-future python-requests python-psycopg2 git-core
 
 RUN pip install threddsclient && \
-    pip install https://github.com/geopython/pywps/archive/48d0e6b5bc5c3f31b3d5eb56341d4a66558ccd51.zip && \
+    pip install git+https://github.com/Ouranosinc/pywps.git@pavics-catalog && \
     pip install https://github.com/Ouranosinc/pyPavics/archive/0.4.3.zip
 
 COPY . /root/
