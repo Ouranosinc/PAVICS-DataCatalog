@@ -1,0 +1,6 @@
+setuptools
+pywps
+requests
+future
+threddsclient
+pavics

@@ -27,8 +27,8 @@ As a docker container running the wps:
 
     docker build -t pavics-datacatalog .
 
-The pywps config file (pywps.cfg) is available. However, the outputurl
-and outputpath values should not be modified as they are currently
+The pywps config file (pywps.cfg) is available. However, the `outputurl`
+and `outputpath` values should not be modified as they are currently
 dynamically set in other places.
 
 Configure as above and run the local build:
@@ -41,11 +41,11 @@ A local solr database can be used:
 
 Solr will be located at http://localhost:8983/solr
 
-New processes must be added to the pavics_datacatalog/wps_processes/__init__.py
+New processes must be added to the `pavics_datacatalog/wps_processes/__init__.py`
 file.
 
-Tests configuration is done in the configtests.cfg file in the tests directory.
-Tests can be run locally in the tests directory with python test_{something}.py
+Tests configuration is done in the `configtests.cfg` file in the tests directory.
+Tests can be run locally in the tests directory with `python test_{something}.py`
 if the dependencies are all installed locally as well. Otherwise, install
 as a package and run:
 
