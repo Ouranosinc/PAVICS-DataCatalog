@@ -16,6 +16,8 @@ class MagpieService:
 
         services = json.loads(response.text)
         self.allowed_urls = []
+        if 'thredds' not in services['services']:
+            return
         for key, service in services['services']['thredds'].items():
             thredds_svc = service['service_name']
             if thredds_svc not in magpie_thredds_services:
