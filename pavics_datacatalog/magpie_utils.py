@@ -23,7 +23,7 @@ class MagpieService:
             if thredds_svc not in magpie_thredds_services:
                 continue
 
-            magpie_path = 'users/current/services/{svc}/resources'.format(
+            magpie_path = 'users/current/services/{svc}/inherited_resources'.format(
                 token=token, svc=thredds_svc)
             response = session.get(os.path.join(magpie_url, magpie_path))
             if response.status_code != 200:
