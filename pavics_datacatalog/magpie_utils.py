@@ -10,7 +10,7 @@ class MagpieService:
         session = requests.Session()
         if token:
             session.cookies.set('auth_tkt', token)
-        response = session.get(magpie_url + '/users/current/services')
+        response = session.get(magpie_url + '/users/current/inherited_services')
         if response.status_code != 200:
             raise response.raise_for_status()
 
