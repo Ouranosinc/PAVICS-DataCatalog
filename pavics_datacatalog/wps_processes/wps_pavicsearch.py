@@ -8,6 +8,19 @@ from pywps import LiteralInput, ComplexOutput
 from pavics import catalog
 from pavics_datacatalog.magpie_utils import MagpieService
 
+import logging
+import sys
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
+
 # Example usage:
 #
 # List facets values:
@@ -158,14 +171,17 @@ class PavicsSearch(Process):
         # So confused about pywps handling of default values...
         # maybe not testing on the proper pywps branch...
         if 'facets' in request.inputs:
+            logger.info('using facets : {0}'.format(request.inputs['facets'][0].data))
             facets = request.inputs['facets'][0].data
         else:
             facets = None
         if 'limit' in request.inputs:
+            logger.info('using limit : {0}'.format(request.inputs['limit'][0].data))
             limit = request.inputs['limit'][0].data
         else:
             limit = 10
         if 'offset' in request.inputs:
+            logger.info('using offset : {0}'.format(request.inputs['offset'][0].data))
             offset = request.inputs['offset'][0].data
         else:
             offset = 0
@@ -174,47 +190,74 @@ class PavicsSearch(Process):
         # Not sure if the default should actually be forced to None here...
         fields = request.inputs['fields'][0].data
         if 'constraints' in request.inputs:
+            logger.info('using constraints : {0}'.format(request.inputs['constraints'][0].data))
             constraints = request.inputs['constraints'][0].data
         else:
             constraints = None
         if 'query' in request.inputs:
+            logger.info('using query : {0}'.format(request.inputs['query'][0].data))
             query = request.inputs['query'][0].data
         else:
             query = None
         if 'esgf' in request.inputs:
+            logger.info('using esgf : {0}'.format(request.inputs['esgf'][0].data))
             search_esgf = request.inputs['esgf'][0].data
         else:
             search_esgf = False
         if 'list_type' in request.inputs:
+            logger.info('using list_type : {0}'.format(request.inputs['list_type'][0].data))
             list_type = request.inputs['list_type'][0].data
         else:
             list_type = 'opendap_url'
 
         if search_esgf:
             try:
+                logger.info('calling pavics_and_esgf_search to {host} and esgf host {esgf} with : '
+                            'facets={facets}, offset={offset}, limit={limit}, '
+                            'fields={fields}, query={query}, constraints={constraints}, '
+                            'search_type={search_type}, output_format={output_format}'.format(
+                    host=self.solr_server, esgf=str(self.esgf_nodes),
+                    facets=facets, offset=offset,
+                    limit=limit, fields=fields, query=query,
+                    constraints=constraints, search_type=search_type,
+                    output_format=output_format
+                ))
                 search_result = catalog.pavics_and_esgf_search(
                     [self.solr_server], self.esgf_nodes, facets=facets,
                     offset=offset, limit=limit, fields=fields, query=query,
                     constraints=constraints, search_type=search_type,
                     output_format=output_format)
             except:
+                logger.error(traceback.format_exc())
                 raise Exception(traceback.format_exc())
         else:
             try:
+                logger.info('calling pavicsearch to {host} with : '
+                            'facets={facets}, offset={offset}, limit={limit}, '
+                            'fields={fields}, query={query}, constraints={constraints}, '
+                            'search_type={search_type}, output_format={output_format}'.format(
+                    host=self.solr_server, facets=facets, offset=offset,
+                    limit=limit, fields=fields, query=query,
+                    constraints=constraints, search_type=search_type,
+                    output_format=output_format
+                ))
                 (search_result, search_url) = catalog.pavicsearch(
                     self.solr_server, facets=facets, offset=offset,
                     limit=limit, fields=fields, query=query,
                     constraints=constraints, search_type=search_type,
                     output_format=output_format)
             except:
+                logger.error(traceback.format_exc())
                 raise Exception(traceback.format_exc())
 
         # magpie integration
         if self.magpie_host:
+            logger.info('Using magpie')
             try:
                 try:
                     token = request.http_request.cookies['auth_tkt']
                 except KeyError:
+                    logger.info('No token, make an anonymous request')
                     token = None
                 mag = MagpieService(
                     self.magpie_host, self.magpie_thredds_servers, token)
@@ -234,18 +277,25 @@ class PavicsSearch(Process):
                             search_result['response']['docs'].pop(i)
                 search_result['response']['numFound'] = \
                     len(search_result['response']['docs'])
+                logger.info('Magpie filtering has removed {0} documents'.format(
+                    ndocs - len(search_result['response']['docs'])))
             except:
+                logger.error('Exception thrown while filtering with magpie')
+                logger.error(traceback.format_exc())
                 raise Exception(traceback.format_exc())
 
         # Here we construct a unique filename
         time_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         output_file_name = "solr_result_{0}_.".format(time_str)
         if output_format == 'application/solr+json':
+            logger.info('Output format is json')
             output_file_name += 'json'
         elif output_format == 'application/solr+xml':
+            logger.info('Output format is xml')
             output_file_name += 'xml'
         else:
             # Unsupported format
+            logger.info('Unsupported output format')
             raise NotImplementedError()
         list_file_name = "list_result_{0}_.json".format(time_str)
 
@@ -270,4 +320,5 @@ class PavicsSearch(Process):
             response.outputs['search_result'].output_format = gmlxml_format
         response.outputs['list_result'].file = output_list_file
         response.outputs['list_result'].output_format = json_format
+        logger.info('Search is completed')
         return response
