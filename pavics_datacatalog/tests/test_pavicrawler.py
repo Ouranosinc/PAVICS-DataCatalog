@@ -2,7 +2,7 @@ import os
 import sys
 import io
 import unittest
-import ConfigParser
+from configparser import ConfigParser, RawConfigParser
 import json
 
 from pywps import Service
@@ -17,7 +17,7 @@ except ImportError:
 class TestPavicsearch(unittest.TestCase):
 
     def setUp(self):
-        self.config = ConfigParser.RawConfigParser()
+        self.config = RawConfigParser()
         if os.path.isfile('configtests.cfg'):
             self.config.read('configtests.cfg')
         else:

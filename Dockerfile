@@ -11,8 +11,8 @@ RUN apt-get -yqq update && \
                          python-future python-requests python-psycopg2 git-core
 
 RUN pip install threddsclient && \
-    pip install git+https://github.com/Ouranosinc/pywps.git@pavics-catalog && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/0.4.3.zip
+    pip install pywps=4.2.3 && \
+    pip install https://github.com/Ouranosinc/pyPavics.git@master
 
 COPY . /root/
 COPY configtests.cfg /root/pavics_datacatalog/tests/

@@ -4,3 +4,4 @@ requests
 future
 threddsclient
 pavics
+requests-magpie
