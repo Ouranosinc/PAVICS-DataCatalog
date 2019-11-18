@@ -10,9 +10,13 @@ RUN apt-get -yqq update && \
                          libapache2-mod-wsgi python-setuptools python-lxml \
                          python-future python-requests python-psycopg2 git-core
 
-RUN pip install threddsclient && \
-    pip install git+https://github.com/Ouranosinc/pywps.git@pavics-catalog && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/0.4.3.zip
+RUN pip install --upgrade pip
+
+# pyproj 2.2.2 is the last release supporting python 2.7
+RUN pip install pyproj==2.2.2 \
+    threddsclient \
+    pywps \
+    https://github.com/Ouranosinc/pyPavics/archive/0.4.3.zip
 
 COPY . /root/
 COPY configtests.cfg /root/pavics_datacatalog/tests/
