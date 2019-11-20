@@ -43,6 +43,7 @@ class PavicsSearch(Process):
     def __init__(self):
         self.solr_server = os.environ.get('SOLR_HOST', None)
         self.magpie_host = os.environ.get('MAGPIE_HOST', None)
+        self.verify = os.environ.get('VERIFY', True) not in ['false', 'False']
         svc_name = os.environ.get('THREDDS_HOST_MAGPIE_SVC_NAME', '')
         self.magpie_thredds_servers = {
             svc_name: host for svc_name, host in
@@ -260,7 +261,7 @@ class PavicsSearch(Process):
                     logger.info('No token, make an anonymous request')
                     token = None
                 mag = MagpieService(
-                    self.magpie_host, self.magpie_thredds_servers, token)
+                    self.magpie_host, self.magpie_thredds_servers, token, self.verify)
                 ndocs = len(search_result['response']['docs'])
                 for i in range(ndocs - 1, -1, -1):
                     doc = search_result['response']['docs'][i]

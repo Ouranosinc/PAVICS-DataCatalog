@@ -4,7 +4,7 @@ import json
 
 
 class MagpieService:
-    def __init__(self, magpie_url, magpie_thredds_services, token):
+    def __init__(self, magpie_url, magpie_thredds_services, token, verify=True):
         permission = 'read'
         magpie_url = magpie_url.rstrip('/')
         session = requests.Session()
@@ -12,7 +12,8 @@ class MagpieService:
             session.cookies.set('auth_tkt', token)
         response = session.get(
             magpie_url + '/users/current/services', 
-            params={'inherit': True, 'cascade': True}
+            params={'inherit': True, 'cascade': True},
+            verify=verify,
         )
         response.raise_for_status()
 
@@ -29,7 +30,7 @@ class MagpieService:
                 url=magpie_url, 
                 svc=thredds_service_name
             )
-            response = session.get(resources_url, params={'inherit': True})
+            response = session.get(resources_url, params={'inherit': True}, verify=verify)
             response.raise_for_status()
 
             service_resources = response.json()['service']
