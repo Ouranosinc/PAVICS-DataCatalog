@@ -174,6 +174,8 @@ class PavicsSearch(Process):
         if 'facets' in request.inputs:
             logger.info('using facets : {0}'.format(request.inputs['facets'][0].data))
             facets = request.inputs['facets'][0].data
+            if facets == 'None':
+                facets = None
         else:
             facets = None
         if 'limit' in request.inputs:
