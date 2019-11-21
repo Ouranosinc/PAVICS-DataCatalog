@@ -4,15 +4,20 @@ FROM ubuntu:16.04
 # 2018-03-22
 RUN apt-get -yqq update && \
     apt-get -yqq install python python-nose python-zmq ipython python-numpy \
-                         python-scipy python-netcdf4 python-matplotlib \
-                         python-mpltoolkits.basemap python-pip \
-                         python-flufl.enum apache2 \
-                         libapache2-mod-wsgi python-setuptools python-lxml \
-                         python-future python-requests python-psycopg2 git-core
+    python-scipy python-netcdf4 python-matplotlib \
+    python-mpltoolkits.basemap python-pip \
+    python-flufl.enum apache2 \
+    libapache2-mod-wsgi python-setuptools python-lxml \
+    python-future python-requests python-psycopg2 git-core
 
-RUN pip install threddsclient && \
-    pip install git+https://github.com/Ouranosinc/pywps.git@pavics-catalog && \
-    pip install https://github.com/Ouranosinc/pyPavics/archive/0.4.3.zip
+RUN pip install --upgrade pip
+
+# the pinned versions for pyproj, threddsclient and pywps are 
+# the last versions to support python 2.7
+RUN pip install pyproj==2.2.2 \
+    threddsclient==0.3.5 \
+    "pywps<4.3" \
+    https://github.com/Ouranosinc/pyPavics/archive/0.4.3.zip
 
 COPY . /root/
 COPY configtests.cfg /root/pavics_datacatalog/tests/

@@ -4,42 +4,47 @@ import json
 
 
 class MagpieService:
-    def __init__(self, magpie_url, magpie_thredds_services, token):
+    def __init__(self, magpie_url, magpie_thredds_services, token, verify=True):
         permission = 'read'
-        magpie_url = magpie_url.strip('/')
+        magpie_url = magpie_url.rstrip('/')
         session = requests.Session()
         if token:
             session.cookies.set('auth_tkt', token)
-        response = session.get(magpie_url + '/users/current/inherited_services')
-        if response.status_code != 200:
-            raise response.raise_for_status()
+        response = session.get(
+            magpie_url + '/users/current/services', 
+            params={'inherit': True, 'cascade': True},
+            verify=verify,
+        )
+        response.raise_for_status()
 
-        services = json.loads(response.text)
+        services = response.json()
         self.allowed_urls = []
         if 'thredds' not in services['services']:
             return
-        for key, service in services['services']['thredds'].items():
-            thredds_svc = service['service_name']
-            if thredds_svc not in magpie_thredds_services:
+        for service in services['services']['thredds'].values():
+            thredds_service_name = service['service_name']
+            if thredds_service_name not in magpie_thredds_services:
                 continue
 
-            magpie_path = 'users/current/services/{svc}/inherited_resources'.format(
-                token=token, svc=thredds_svc)
-            response = session.get(os.path.join(magpie_url, magpie_path))
-            if response.status_code != 200:
-                raise response.raise_for_status()
+            resources_url = '{url}/users/current/services/{svc}/resources'.format(
+                url=magpie_url, 
+                svc=thredds_service_name
+            )
+            response = session.get(resources_url, params={'inherit': True}, verify=verify)
+            response.raise_for_status()
 
-            response_data = json.loads(response.text)
-            service = response_data['service']
+            service_resources = response.json()['service']
 
-            thredds_host = magpie_thredds_services[thredds_svc].strip('/')
+            thredds_host = magpie_thredds_services[thredds_service_name].strip('/')
             if permission in service['permission_names']:
                 self.allowed_urls.append(thredds_host)
             else:
-                for c_id, resource_tree in service['resources'].items():
+                for c_id, resource_tree in service_resources['resources'].items():
                     for resource_path in self.tree_parser(
-                            resource_tree, permission,
-                            '/'.join([thredds_host, 'fileServer'])):
+                        resource_tree, 
+                        permission,
+                        '/'.join([thredds_host, 'fileServer'])
+                    ):
                         self.allowed_urls.append(resource_path.strip('/'))
 
     def tree_parser(self, resources_tree, permission, url):
