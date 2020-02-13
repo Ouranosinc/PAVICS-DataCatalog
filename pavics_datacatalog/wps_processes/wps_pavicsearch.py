@@ -265,6 +265,7 @@ class PavicsSearch(Process):
                 mag = MagpieService(
                     self.magpie_host, self.magpie_thredds_servers, token, self.verify)
                 ndocs = len(search_result['response']['docs'])
+                logger.debug("magpie filtering: initial ndocs=%r" % ndocs)
                 for i in range(ndocs - 1, -1, -1):
                     doc = search_result['response']['docs'][i]
                     # Skip if ESGF result
@@ -273,10 +274,12 @@ class PavicsSearch(Process):
                     if hasattr(doc['url'], '__iter__'):
                         for doc_url in doc['url']:
                             if not mag.has_view_perm(doc_url):
+                                logger.debug("magpie filtering: removing doc_url=%r" % doc_url)
                                 search_result['response']['docs'].pop(i)
                                 break
                     else:
                         if not mag.has_view_perm(doc['url']):
+                            logger.debug("magpie filtering: removing doc_url=%r" % doc['url'])
                             search_result['response']['docs'].pop(i)
                 search_result['response']['numFound'] = \
                     len(search_result['response']['docs'])
